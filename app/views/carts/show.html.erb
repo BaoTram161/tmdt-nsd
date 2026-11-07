@@ -1,0 +1,104 @@
+<% content_for :title, "Giỏ hàng | BLACK GINSENG" %>
+
+<section class="bg-[#F7F4EA] border-b border-[#D8D0B8] py-10">
+  <div class="max-w-7xl mx-auto px-4 text-center">
+    <p class="text-xs tracking-[0.25em] font-semibold text-[#A8873D]">BLACK GINSENG</p>
+    <h1 class="mt-3 text-3xl font-serif font-bold text-[#123D2B]">GIỎ HÀNG</h1>
+  </div>
+</section>
+
+<section class="max-w-7xl mx-auto px-4 py-12">
+  <% if @cart_items.any? %>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div class="lg:col-span-2 space-y-4">
+        <% @cart_items.each do |product, quantity| %>
+          <div class="flex flex-col sm:flex-row gap-5 border border-[#E2DDCE] bg-white p-5">
+            <%= link_to product_path(product),
+                  class: "w-full sm:w-32 aspect-square bg-[#F7F4EA] flex items-center justify-center p-3 shrink-0" do %>
+              <% if product.image_url.present? %>
+                <%= image_tag product.image_url,
+                      alt: product.name,
+                      class: "w-full h-full object-contain" %>
+              <% else %>
+                <span class="text-xs text-gray-400">Chưa có ảnh</span>
+              <% end %>
+            <% end %>
+
+            <div class="flex-1 min-w-0">
+              <%= link_to product.name, product_path(product),
+                    class: "font-semibold text-[#123D2B] hover:text-[#A8873D]" %>
+
+              <p class="mt-2 text-sm text-[#1B5B3A] font-bold">
+                <%= format_vnd(product.price) %>
+              </p>
+
+              <div class="mt-4 flex flex-wrap items-center gap-3">
+                <%= form_with url: update_cart_item_path(product),
+                      method: :patch,
+                      class: "flex items-center gap-2" do |f| %>
+                  <%= f.number_field :quantity,
+                        value: quantity,
+                        min: 1,
+                        class: "w-20 border border-[#D8D0B8] px-3 py-2 text-sm" %>
+                  <%= f.submit "Cập nhật",
+                        class: "text-xs font-semibold text-[#123D2B] hover:text-[#A8873D] cursor-pointer" %>
+                <% end %>
+
+                <%= button_to "Xóa",
+                      remove_cart_item_path(product),
+                      method: :delete,
+                      class: "text-xs text-red-600 hover:underline" %>
+              </div>
+            </div>
+
+            <div class="sm:text-right">
+              <p class="text-xs text-gray-500">Thành tiền</p>
+              <p class="mt-2 font-bold text-[#123D2B]">
+                <%= format_vnd(product.price * quantity) %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+
+      <aside class="border border-[#D8D0B8] bg-[#F7F4EA] p-6 h-fit">
+        <h2 class="text-lg font-serif font-bold text-[#123D2B]">TỔNG ĐƠN HÀNG</h2>
+
+        <div class="mt-6 flex justify-between text-sm">
+          <span class="text-gray-600">Tạm tính</span>
+          <span class="font-semibold"><%= format_vnd(@cart_total) %></span>
+        </div>
+
+        <div class="mt-4 border-t border-[#D8D0B8] pt-4 flex justify-between gap-3">
+          <span class="font-semibold text-[#123D2B]">Tổng cộng</span>
+          <span class="text-xl font-bold text-[#1B5B3A]">
+            <%= format_vnd(@cart_total) %>
+          </span>
+        </div>
+
+        <p class="mt-3 text-xs text-gray-500">
+          Phí vận chuyển sẽ được tư vấn khi xác nhận đơn hàng.
+        </p>
+
+        <button type="button"
+                disabled
+                class="mt-6 w-full bg-gray-400 text-white py-3 text-sm font-semibold cursor-not-allowed">
+          THANH TOÁN (ĐANG PHÁT TRIỂN)
+        </button>
+
+        <%= link_to "TIẾP TỤC MUA SẮM",
+              products_path,
+              class: "block mt-4 text-center border border-[#123D2B] text-[#123D2B] py-3 text-sm font-semibold hover:bg-white transition" %>
+      </aside>
+    </div>
+  <% else %>
+    <div class="border border-[#D8D0B8] bg-white py-16 px-5 text-center">
+      <p class="text-lg font-semibold text-[#123D2B]">Giỏ hàng của bạn đang trống</p>
+      <p class="mt-2 text-sm text-gray-500">Hãy khám phá các sản phẩm nhân sâm đen của chúng tôi.</p>
+
+      <%= link_to "KHÁM PHÁ SẢN PHẨM",
+            products_path,
+            class: "inline-block mt-6 bg-[#123D2B] text-white px-7 py-3 text-sm font-semibold hover:bg-[#1B5B3A] transition" %>
+    </div>
+  <% end %>
+</section>
