@@ -14,6 +14,6 @@ class Category < ApplicationRecord
 
   # Lấy ID của danh mục hiện tại và các danh mục con
   def self_and_children_ids
-    [id] + children.pluck(:id)
+    [ id ] + children.pluck(:id)
   end
 end

@@ -6,7 +6,7 @@ class CartsController < ApplicationController
 
     @cart_items = cart.filter_map do |product_id, quantity|
       product = products[product_id.to_i]
-      [product, quantity.to_i] if product
+      [ product, quantity.to_i ] if product
     end
 
     @cart_total = @cart_items.sum do |product, quantity|

@@ -11,7 +11,7 @@ class WishlistsController < ApplicationController
     product = Product.available.find(params[:product_id])
 
     session[:wishlist] ||= []
-    session[:wishlist] |= [product.id.to_s]
+    session[:wishlist] |= [ product.id.to_s ]
 
     redirect_back fallback_location: wishlist_path,
                   notice: "Đã thêm sản phẩm vào danh sách yêu thích."
