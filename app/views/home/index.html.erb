@@ -1,4 +1,215 @@
-<div>
-  <h1 class="font-bold text-4xl">Home#index</h1>
-  <p>Find me in app/views/home/index.html.erb</p>
-</div>
+<% content_for :title, "BLACK GINSENG | Nhân sâm đen" %>
+
+<!-- BANNER CHÍNH -->
+<section class="bg-[#EDF3ED] overflow-hidden">
+  <div class="max-w-7xl mx-auto px-5 py-8 md:py-10 grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+
+    <!-- NỘI DUNG -->
+    <div class="w-full max-w-[560px] mx-auto space-y-5 text-center">
+      <h1 class="text-4xl md:text-5xl lg:text-[56px] font-serif font-bold leading-[1.15] text-[#123D2B]">
+        NHÂN SÂM ĐEN
+        <span class="block mt-3 text-[#A8873D] text-3xl md:text-4xl">
+          Tinh hoa từ thiên nhiên
+        </span>
+      </h1>
+
+      <div class="w-16 h-[2px] bg-[#B99A55] mx-auto"></div>
+
+      <p class="max-w-[520px] mx-auto text-center text-[#59665C] leading-8 text-base md:text-[17px]">
+        Khám phá bộ sưu tập sản phẩm nhân sâm đen với nhiều quy cách
+        đóng gói, giúp bạn dễ dàng tìm hiểu và lựa chọn sản phẩm phù hợp.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <a href="#san-pham"
+           class="inline-flex items-center justify-center px-7 py-3.5 bg-[#123D2B] text-white text-sm font-semibold tracking-wide hover:bg-[#1B5B3A] transition">
+          KHÁM PHÁ SẢN PHẨM
+        </a>
+
+        <a href="#gioi-thieu"
+           class="inline-flex items-center justify-center px-7 py-3.5 border border-[#B99A55] text-[#123D2B] text-sm font-semibold hover:bg-white/60 transition">
+          VỀ THƯƠNG HIỆU
+        </a>
+      </div>
+    </div>
+
+    <!-- HÌNH ẢNH SẢN PHẨM -->
+    <div class="w-full max-w-[560px] mx-auto">
+      <div class="bg-[#F8F6EF] border border-[#E5E0D2] rounded-xl p-3 md:p-4 shadow-sm">
+        <%= image_tag "https://lechef.vn/uploads/erp/products/product_image/image_url/397/large_B%E1%BA%A3n_sao_c%E1%BB%A7a_Nh%C3%A2n_S%C3%A2m_%C4%90en_25g.jpg",
+              alt: "Sản phẩm nhân sâm đen",
+              class: "w-full h-[340px] md:h-[400px] lg:h-[430px] object-contain" %>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ĐIỂM NHẤN -->
+<section class="bg-[#EDE8D9] border-b border-[#D8D0B8]">
+  <div class="max-w-7xl mx-auto px-4 py-7 grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+
+    <div class="sm:border-r sm:border-[#D8D0B8]">
+      <p class="text-[#123D2B] font-serif font-bold">SẢN PHẨM NHÂN SÂM ĐEN</p>
+      <p class="text-sm text-gray-600 mt-1">Tập trung vào dòng sản phẩm chuyên biệt</p>
+    </div>
+
+    <div class="sm:border-r sm:border-[#D8D0B8]">
+      <p class="text-[#123D2B] font-serif font-bold">ĐA DẠNG QUY CÁCH</p>
+      <p class="text-sm text-gray-600 mt-1">Nhiều lựa chọn về khối lượng và đóng gói</p>
+    </div>
+
+    <div>
+      <p class="text-[#123D2B] font-serif font-bold">DỄ DÀNG LỰA CHỌN</p>
+      <p class="text-sm text-gray-600 mt-1">Phù hợp với nhu cầu sử dụng</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- DANH MỤC SẢN PHẨM -->
+<section id="danh-muc" class="max-w-7xl mx-auto px-4 py-16">
+  <div class="text-center mb-10">
+    <p class="text-xs tracking-[0.25em] text-[#A8873D] font-semibold">
+      KHÁM PHÁ SẢN PHẨM
+    </p>
+
+    <h2 class="text-3xl md:text-4xl font-serif font-bold text-[#123D2B] mt-3">
+      DANH MỤC SẢN PHẨM
+    </h2>
+
+    <p class="text-gray-600 mt-3">
+      Tìm hiểu các dòng sản phẩm nhân sâm đen
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6">
+    <% @categories.each do |category| %>
+      <% next if category.children.empty? %>
+
+      <article class="group w-full max-w-2xl mx-auto bg-[#F7F4EA] border border-[#D8D0B8] hover:border-[#B99A55] hover:shadow-lg transition text-center">
+        <div class="p-7 md:p-9">
+          <h3 class="mt-3 text-2xl font-serif font-bold text-[#123D2B]">
+            <%= category.name %>
+          </h3>
+
+          <p class="mt-2 text-sm text-gray-600">
+            Lựa chọn dòng sản phẩm theo nhu cầu của bạn.
+          </p>
+
+          <div class="flex flex-wrap justify-center gap-2 mt-6">
+            <% category.children.each do |child| %>
+              <a href="#san-pham"
+                 class="px-4 py-2 bg-white border border-[#D8D0B8] text-sm text-[#244331] hover:bg-[#123D2B] hover:text-white transition">
+                <%= child.name %>
+              </a>
+            <% end %>
+          </div>
+        </div>
+      </article>
+    <% end %>
+  </div>
+</section>
+
+<!-- SẢN PHẨM NỔI BẬT -->
+<section id="san-pham" class="bg-[#F1EEE4] border-y border-[#E0D9C7] py-16">
+  <div class="max-w-7xl mx-auto px-4">
+
+    <div class="flex flex-col items-center text-center gap-3 mb-9">
+      <div>
+        <p class="text-xs tracking-[0.25em] text-[#A8873D] font-semibold">
+          SẢN PHẨM DÀNH CHO BẠN
+        </p>
+
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-[#123D2B] mt-3">
+          SẢN PHẨM NỔI BẬT
+        </h2>
+
+        <p class="text-gray-600 mt-2">
+          Khám phá các sản phẩm nhân sâm đen.
+        </p>
+      </div>
+
+      <span class="text-sm text-[#56705F]">
+        <%= @featured_products.size %> sản phẩm
+      </span>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+      <% @featured_products.each do |product| %>
+        <article class="group bg-white border border-[#E2DDCE] hover:border-[#B99A55] hover:shadow-xl transition duration-300">
+
+          <div class="aspect-square bg-[#F7F4EA] flex items-center justify-center p-4 overflow-hidden">
+            <% if product.image_url.present? %>
+              <%= image_tag product.image_url,
+                    alt: product.name,
+                    class: "w-full h-full object-contain group-hover:scale-105 transition duration-300" %>
+            <% else %>
+              <div class="text-center px-3">
+                <span class="text-4xl text-[#B99A55]" aria-hidden="true">✧</span>
+                <p class="text-xs text-gray-500 mt-2">
+                  Hình ảnh đang cập nhật
+                </p>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="p-4 md:p-5">
+            <p class="text-[10px] tracking-[0.15em] text-[#A8873D] font-semibold">
+              NHÂN SÂM ĐEN
+            </p>
+
+            <h3 class="font-semibold text-[#263B2E] mt-2 min-h-12 line-clamp-2">
+              <%= product.name %>
+            </h3>
+
+            <p class="text-lg font-bold text-[#1B5B3A] mt-3">
+              <%= format_vnd(product.price) %>
+            </p>
+
+            <%= link_to "XEM CHI TIẾT",
+                  product_path(product),
+                  class: "inline-flex items-center justify-center w-full mt-4 py-2.5 border border-[#123D2B] text-[#123D2B] text-xs font-semibold tracking-wider hover:bg-[#123D2B] hover:text-white transition" %>
+          </div>
+
+        </article>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<!-- GIỚI THIỆU -->
+<section id="gioi-thieu" class="max-w-7xl mx-auto px-4 py-16">
+  <div class="relative overflow-hidden bg-[#123D2B] px-7 py-12 md:px-16 md:py-16 text-center text-white">
+
+    <div class="absolute inset-0 opacity-10"
+         style="background: radial-gradient(circle at center, #E9CF8A, transparent 65%);">
+    </div>
+
+    <div class="relative">
+      <p class="text-xs tracking-[0.3em] text-[#E9CF8A] font-semibold">
+        VỀ BLACK GINSENG
+      </p>
+
+      <h2 class="text-3xl md:text-4xl font-serif font-bold mt-4">
+        TINH HOA NHÂN SÂM ĐEN TỪ WISCONSIN – HOA KỲ
+      </h2>
+
+      <div class="w-16 h-[2px] bg-[#D4AF62] mx-auto mt-6"></div>
+
+      <p class="max-w-2xl mx-auto text-green-100 leading-8 mt-6">
+        BLACK GINSENG mang đến không gian mua sắm chuyên biệt dành cho
+        những ai quan tâm và tìm hiểu về nhân sâm đen.
+        Với đa dạng sản phẩm và quy cách lựa chọn, chúng tôi hướng đến
+        trải nghiệm mua sắm thuận tiện, thông tin sản phẩm rõ ràng
+        và dễ dàng khám phá.
+      </p>
+
+      <a href="#san-pham"
+         class="inline-block mt-8 px-8 py-3 bg-[#D4AF62] text-[#0B291D] font-bold hover:bg-[#E9CF8A] transition">
+        KHÁM PHÁ SẢN PHẨM
+      </a>
+    </div>
+
+  </div>
+</section>
