@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@theme {
+  --color-nsd-dark: #123D2B;
+  --color-nsd: #1B5B3A;
+  --color-nsd-deep: #0B291D;
+  --color-nsd-light: #EAF2EC;
+  --color-nsd-border: #D8D0B8;
+  --color-nsd-gold: #B99A55;
+  --color-nsd-yellow: #E9CF8A;
+  --color-nsd-price: #A83232;
+}
+
+/* Ẩn nút tăng giảm mặc định của ô số lượng */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
