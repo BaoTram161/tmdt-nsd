@@ -10,8 +10,10 @@ module Admin
         @orders = @orders.where(status: params[:status])
       end
 
-      if params[:q].present?
-        keyword = "%#{params[:q].strip}%"
+      keyword = params[:q].to_s.strip
+
+      if keyword.present?
+        keyword = "%#{ActiveRecord::Base.sanitize_sql_like(keyword)}%"
 
         @orders = @orders.where(
           "order_number LIKE :q OR recipient_name LIKE :q OR phone LIKE :q",
