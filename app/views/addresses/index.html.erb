@@ -1,0 +1,96 @@
+<% content_for :title, "Địa chỉ | BLACK GINSENG" %>
+
+<section class="border-b border-[#D8D0B8] bg-[#F7F4EA] py-10">
+  <div class="mx-auto max-w-7xl px-4 text-center">
+    <p class="text-xs font-semibold tracking-[0.25em] text-[#A8873D]">BLACK GINSENG</p>
+    <h1 class="mt-3 font-serif text-3xl font-bold text-[#123D2B]">ĐỊA CHỈ NHẬN HÀNG</h1>
+    <p class="mt-2 text-sm text-gray-500">Quản lý địa chỉ nhận hàng của bạn</p>
+  </div>
+</section>
+
+<section class="mx-auto w-full max-w-7xl px-4 py-12">
+  <div class="grid grid-cols-[280px_minmax(0,1fr)] gap-8">
+
+    <aside class="h-fit border border-[#D8D0B8] bg-white p-5">
+      <h2 class="font-serif text-lg font-bold text-[#123D2B]">QUẢN LÝ TÀI KHOẢN</h2>
+
+      <div class="mt-5 space-y-1">
+        <%= link_to "Thông tin cá nhân", profile_path,
+              class: "block px-4 py-3 text-sm text-gray-600 transition hover:bg-[#F7F4EA] hover:text-[#123D2B]" %>
+
+        <%= link_to "Địa chỉ nhận hàng", addresses_path,
+              class: "block bg-[#F7F4EA] px-4 py-3 text-sm font-semibold text-[#123D2B]" %>
+      </div>
+    </aside>
+
+    <div>
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="font-serif text-xl font-bold text-[#123D2B]">ĐỊA CHỈ GIAO HÀNG</h2>
+          <p class="mt-1 text-sm text-gray-500">Bạn có thể lưu nhiều địa chỉ nhận hàng.</p>
+        </div>
+
+        <%= link_to new_address_path,
+              class: "inline-flex items-center gap-2 bg-[#123D2B] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#1B5B3A]" do %>
+          THÊM ĐỊA CHỈ
+        <% end %>
+      </div>
+
+      <% if @addresses.any? %>
+        <div class="mt-6 space-y-4">
+          <% @addresses.each do |address| %>
+            <div class="border border-[#D8D0B8] bg-white p-5">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="font-semibold text-[#123D2B]"><%= address.label %></h3>
+
+                  <% if address.is_default? %>
+                    <span class="border border-[#A8873D] px-2 py-1 text-[10px] font-semibold tracking-wide text-[#987638]">
+                      MẶC ĐỊNH
+                    </span>
+                  <% end %>
+                </div>
+
+                <div class="flex items-center gap-4 text-sm">
+                  <%= link_to "Chỉnh sửa", edit_address_path(address),
+                        class: "font-medium text-[#1B5B3A] hover:text-[#A8873D]" %>
+
+                  <%= button_to "Xóa", address_path(address),
+                        method: :delete,
+                        form: { data: { turbo_confirm: "Bạn có chắc chắn muốn xóa địa chỉ này?" } },
+                        class: "font-medium text-red-600 hover:text-red-800" %>
+                </div>
+              </div>
+
+              <div class="mt-4 space-y-2 text-sm text-gray-600">
+                <p>
+                  <span class="font-medium text-[#244331]">Người nhận:</span>
+                  <%= address.recipient_name %>
+                </p>
+
+                <p>
+                  <span class="font-medium text-[#244331]">Điện thoại:</span>
+                  <%= address.phone %>
+                </p>
+
+                <p>
+                  <span class="font-medium text-[#244331]">Địa chỉ:</span>
+                  <%= [address.street_address, address.ward, address.province].reject(&:blank?).join(", ") %>
+                </p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="mt-6 border border-[#D8D0B8] bg-white px-5 py-14 text-center">
+          <p class="font-semibold text-[#123D2B]">Bạn chưa lưu địa chỉ giao hàng nào</p>
+          <p class="mt-2 text-sm text-gray-500">Thêm địa chỉ để thuận tiện hơn khi đặt hàng.</p>
+
+          <%= link_to "THÊM ĐỊA CHỈ NGAY",
+                new_address_path,
+                class: "mt-6 inline-block bg-[#123D2B] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1B5B3A]" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>

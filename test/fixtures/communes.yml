@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  province: one
+  code: "TEST_COMMUNE_01"
+  name: "Phường kiểm thử 1"
+  administrative_level: "Phường"
+  decree: "Nghị quyết kiểm thử 1"
+
+two:
+  province: two
+  code: "TEST_COMMUNE_02"
+  name: "Phường kiểm thử 2"
+  administrative_level: "Phường"
+  decree: "Nghị quyết kiểm thử 2"

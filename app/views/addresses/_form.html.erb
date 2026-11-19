@@ -1,0 +1,104 @@
+<% if address.errors.any? %>
+  <div class="mb-6 border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+    <p class="font-semibold">Vui lòng kiểm tra lại thông tin:</p>
+    <ul class="mt-2 list-inside list-disc">
+      <% address.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: address, class: "space-y-5" do |f| %>
+  <div data-controller="address-form">
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+      <div>
+        <%= f.label :label, "Tên địa chỉ",
+              class: "mb-2 block text-sm font-semibold text-[#244331]" %>
+        <%= f.select :label,
+              [["Nhà riêng", "Nhà riêng"], ["Công ty", "Công ty"], ["Khác", "Khác"]],
+              { include_blank: "Chọn tên địa chỉ" },
+              class: "w-full border border-[#D8D0B8] bg-[#FFFEFA] px-4 py-3 text-sm outline-none focus:border-[#A8873D]" %>
+      </div>
+
+      <div>
+        <%= f.label :recipient_name, "Tên người nhận",
+              class: "mb-2 block text-sm font-semibold text-[#244331]" %>
+        <%= f.text_field :recipient_name,
+              autocomplete: "name",
+              placeholder: "Nhập tên người nhận",
+              class: "w-full border border-[#D8D0B8] bg-[#FFFEFA] px-4 py-3 text-sm outline-none focus:border-[#A8873D]" %>
+      </div>
+
+      <div class="sm:col-span-2">
+        <%= f.label :phone, "Số điện thoại",
+              class: "mb-2 block text-sm font-semibold text-[#244331]" %>
+        <%= f.telephone_field :phone,
+              autocomplete: "tel",
+              placeholder: "Nhập số điện thoại người nhận",
+              class: "w-full border border-[#D8D0B8] bg-[#FFFEFA] px-4 py-3 text-sm outline-none focus:border-[#A8873D]" %>
+      </div>
+
+      <div>
+        <%= f.label :province, "Tỉnh / Thành phố",
+              class: "mb-2 block text-sm font-semibold text-[#244331]" %>
+        <%= f.select :province,
+              options_for_select(@provinces.map { |province| [province.name, province.name] }, address.province),
+              { include_blank: "Chọn tỉnh / thành phố" },
+              {
+                data: {
+                  address_form_target: "province",
+                  action: "change->address-form#filterCommunes"
+                },
+                class: "w-full border border-[#D8D0B8] bg-[#FFFEFA] px-4 py-3 text-sm outline-none focus:border-[#A8873D]"
+              } %>
+      </div>
+
+      <div>
+        <%= f.label :ward, "Phường / Xã",
+              class: "mb-2 block text-sm font-semibold text-[#244331]" %>
+        <%= f.select :ward,
+              options_for_select(
+                @communes.map { |commune|
+                  [
+                    commune.name,
+                    commune.name,
+                    { "data-province-name": commune.province.name }
+                  ]
+                },
+                address.ward
+              ),
+              { include_blank: "Chọn phường / xã" },
+              {
+                data: { address_form_target: "commune" },
+                disabled: address.province.blank?,
+                class: "w-full border border-[#D8D0B8] bg-[#FFFEFA] px-4 py-3 text-sm outline-none focus:border-[#A8873D] disabled:bg-gray-100"
+              } %>
+      </div>
+
+      <div class="sm:col-span-2">
+        <%= f.label :street_address, "Địa chỉ cụ thể",
+              class: "mb-2 block text-sm font-semibold text-[#244331]" %>
+        <%= f.text_field :street_address,
+              autocomplete: "street-address",
+              placeholder: "Số nhà, tên đường, thôn / ấp / khu phố...",
+              class: "w-full border border-[#D8D0B8] bg-[#FFFEFA] px-4 py-3 text-sm outline-none focus:border-[#A8873D]" %>
+      </div>
+    </div>
+  </div>
+
+  <label class="flex items-center gap-3 text-sm text-[#244331]">
+    <%= f.check_box :is_default,
+          class: "h-4 w-4 accent-[#123D2B]" %>
+    Đặt làm địa chỉ giao hàng mặc định
+  </label>
+
+  <div class="flex flex-wrap gap-3 border-t border-[#E8E2D5] pt-5">
+    <%= f.submit address.persisted? ? "LƯU ĐỊA CHỈ" : "THÊM ĐỊA CHỈ",
+          class: "cursor-pointer bg-[#123D2B] px-7 py-3 text-sm font-semibold text-white transition hover:bg-[#1B5B3A]" %>
+
+    <%= link_to "HỦY",
+          addresses_path,
+          class: "border border-[#123D2B] px-7 py-3 text-sm font-semibold text-[#123D2B] transition hover:bg-[#F7F4EA]" %>
+  </div>
+<% end %>
