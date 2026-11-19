@@ -27,7 +27,7 @@ class CheckoutsController < ApplicationController
         raise CheckoutError, "#{product.name} không đủ số lượng trong kho."
       end
 
-      [product, quantity]
+      [ product, quantity ]
     end
 
     @addresses = Current.user.addresses.order(
@@ -80,7 +80,7 @@ class CheckoutsController < ApplicationController
                 "#{product.name} chỉ còn #{product.stock} sản phẩm trong kho."
         end
 
-        [product, quantity]
+        [ product, quantity ]
       end
 
       subtotal = calculate_subtotal(cart_items)
