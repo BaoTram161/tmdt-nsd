@@ -1,0 +1,158 @@
+<% content_for :title, "Quản lý sản phẩm | BLACK GINSENG" %>
+
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:px-8">
+  <div class="mx-auto max-w-7xl">
+
+    <div class="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+      <div>
+        <p class="mb-2 text-xs font-semibold tracking-[0.25em] text-[#B99A55]">
+          BLACK GINSENG / ADMIN
+        </p>
+        <h1 class="text-3xl font-bold text-[#123D2B]">QUẢN LÝ SẢN PHẨM</h1>
+        <p class="mt-2 text-sm text-gray-600">
+          Quản lý danh sách, giá bán và số lượng tồn kho.
+        </p>
+      </div>
+
+      <%= link_to "＋ THÊM SẢN PHẨM", new_admin_product_path,
+          class: "rounded-lg bg-[#123D2B] px-5 py-3 text-center text-sm font-semibold text-white hover:bg-[#1B5B3A]" %>
+    </div>
+
+    <div class="mb-6 rounded-xl border border-[#D8D0B8] bg-white p-5">
+      <%= form_with url: admin_products_path, method: :get,
+          class: "grid gap-4 md:grid-cols-4" do |form| %>
+
+        <div class="md:col-span-2">
+          <%= form.label :q, "Tìm kiếm sản phẩm",
+              class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+          <%= form.text_field :q, value: params[:q],
+              placeholder: "Nhập tên hoặc thương hiệu...",
+              class: "w-full rounded-lg border border-[#D8D0B8] px-4 py-2.5 text-sm focus:border-[#1B5B3A] focus:outline-none" %>
+        </div>
+
+        <div>
+          <%= form.label :category_id, "Danh mục",
+              class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+          <%= form.select :category_id,
+              options_for_select(
+                [["Tất cả danh mục", ""]] +
+                @categories.map { |c| [c.parent ? "#{c.parent.name} / #{c.name}" : c.name, c.id] },
+                params[:category_id]
+              ),
+              {},
+              class: "w-full rounded-lg border border-[#D8D0B8] px-3 py-2.5 text-sm" %>
+        </div>
+
+        <div>
+          <%= form.label :active, "Trạng thái",
+              class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+          <%= form.select :active,
+              options_for_select(
+                [["Tất cả", ""], ["Đang hiển thị", "active"], ["Đang ẩn", "inactive"]],
+                params[:active]
+              ),
+              {},
+              class: "w-full rounded-lg border border-[#D8D0B8] px-3 py-2.5 text-sm" %>
+        </div>
+
+        <div class="flex gap-2 md:col-span-4">
+          <%= form.submit "TÌM KIẾM",
+              class: "rounded-lg bg-[#1B5B3A] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#123D2B]" %>
+          <%= link_to "XÓA TÌM KIẾM", admin_products_path,
+              class: "rounded-lg border border-[#D8D0B8] px-5 py-2.5 text-sm font-semibold text-[#123D2B] hover:bg-[#F7F4EA]" %>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="overflow-hidden rounded-xl border border-[#D8D0B8] bg-white">
+      <div class="border-b border-[#D8D0B8] px-5 py-4">
+        <h2 class="font-semibold text-[#123D2B]">
+          Danh sách sản phẩm
+          <span class="ml-2 text-sm font-normal text-gray-500">
+            (<%= @products.count %> sản phẩm)
+          </span>
+        </h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[850px] text-left text-sm">
+          <thead class="bg-[#F7F4EA] text-xs uppercase text-[#123D2B]">
+            <tr>
+              <th class="px-5 py-4">Sản phẩm</th>
+              <th class="px-4 py-4">Danh mục</th>
+              <th class="px-4 py-4">Giá bán</th>
+              <th class="px-4 py-4">Tồn kho</th>
+              <th class="px-4 py-4">Trạng thái</th>
+              <th class="px-5 py-4 text-center">Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-[#EEE8DA]">
+            <% @products.each do |product| %>
+              <tr class="hover:bg-[#FCFAF5]">
+                <td class="px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <% if product.image_url.present? %>
+                      <img src="<%= product.image_url %>" alt=""
+                           class="h-14 w-14 rounded-lg border border-[#D8D0B8] object-cover">
+                    <% else %>
+                      <div class="flex h-14 w-14 items-center justify-center rounded-lg bg-[#F7F4EA] text-xs text-gray-400">
+                        No image
+                      </div>
+                    <% end %>
+                    <div>
+                      <p class="max-w-xs font-semibold text-[#123D2B]"><%= product.name %></p>
+                      <p class="mt-1 text-xs text-gray-500"><%= product.brand.presence || "Chưa có thương hiệu" %></p>
+                    </div>
+                  </div>
+                </td>
+
+                <td class="px-4 py-4 text-gray-600"><%= product.category.name %></td>
+                <td class="whitespace-nowrap px-4 py-4 font-semibold text-[#A83232]">
+                  <%= format_vnd(product.price) %>
+                </td>
+                <td class="px-4 py-4"><%= product.stock %></td>
+
+                <td class="px-4 py-4">
+                  <% if product.active? %>
+                    <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">Đang hiển thị</span>
+                  <% else %>
+                    <span class="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">Đang ẩn</span>
+                  <% end %>
+                </td>
+
+                <td class="px-5 py-4">
+                  <div class="flex items-center justify-center gap-3">
+                    <%= link_to "Sửa", edit_admin_product_path(product),
+                        class: "font-semibold text-[#1B5B3A] hover:underline" %>
+
+                    <%= button_to(product.active? ? "Ẩn" : "Hiện",
+                        toggle_active_admin_product_path(product),
+                        method: :patch,
+                        form: { class: "inline" },
+                        class: "font-semibold text-[#A83232] hover:underline") %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+
+            <% if @products.empty? %>
+              <tr>
+                <td colspan="6" class="px-5 py-12 text-center text-gray-500">
+                  Không tìm thấy sản phẩm phù hợp.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-8 border-t border-[#D8D0B8] pt-6">
+      <%= link_to "← QUAY LẠI TRANG QUẢN TRỊ",
+          admin_root_path,
+          class: "inline-flex items-center text-sm font-semibold tracking-wider text-[#1B5B3A] transition hover:text-[#B99A55]" %>
+    </div>
+
+  </div>
+</div>

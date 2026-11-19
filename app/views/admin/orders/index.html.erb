@@ -1,0 +1,147 @@
+<% content_for :title, "Quản lý đơn hàng | BLACK GINSENG" %>
+
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:px-8">
+  <div class="mx-auto max-w-7xl">
+
+    <div class="mb-8">
+      <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#B99A55]">
+        BLACK GINSENG
+      </p>
+
+      <h1 class="text-2xl font-semibold tracking-wide text-[#123D2B] md:text-3xl">
+        QUẢN LÝ ĐƠN HÀNG
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-500">
+        Theo dõi và xử lý đơn hàng của khách hàng.
+      </p>
+    </div>
+
+    <!-- Tìm kiếm và lọc -->
+    <div class="mb-6 border border-[#D8D0B8] bg-white p-5">
+      <%= form_with url: admin_orders_path, method: :get,
+            class: "flex flex-col gap-3 md:flex-row" do |form| %>
+
+        <%= form.text_field :q,
+              value: params[:q],
+              placeholder: "Tìm mã đơn, tên người nhận hoặc số điện thoại...",
+              class: "min-w-0 flex-1 border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#123D2B]" %>
+
+        <%= form.select :status,
+              options_for_select(
+                [
+                  ["Tất cả trạng thái", ""],
+                  ["Chờ xác nhận", "pending"],
+                  ["Đã xác nhận", "confirmed"],
+                  ["Đang giao", "shipping"],
+                  ["Đã giao", "delivered"],
+                  ["Đã hủy", "cancelled"]
+                ],
+                params[:status]
+              ),
+              {},
+              class: "border border-[#D8D0B8] bg-white px-4 py-3 text-sm text-gray-700" %>
+
+        <div class="flex flex-wrap gap-3">
+          <%= form.submit "TÌM KIẾM",
+                class: "cursor-pointer bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wide text-white hover:bg-[#1B5B3A]" %>
+
+          <%= link_to "XÓA TÌM KIẾM",
+                admin_orders_path,
+                class: "border border-[#D8D0B8] px-6 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] hover:bg-[#F7F4EA]" %>
+        </div>
+
+      <% end %>
+    </div>
+
+    <!-- Danh sách đơn hàng -->
+    <div class="border border-[#D8D0B8] bg-white">
+      <div class="border-b border-[#D8D0B8] px-5 py-4">
+        <h2 class="font-semibold text-[#123D2B]">
+          DANH SÁCH ĐƠN HÀNG
+        </h2>
+
+        <p class="mt-1 text-xs text-gray-500">
+          Tổng số: <%= @orders.count %> đơn hàng
+        </p>
+      </div>
+
+      <% if @orders.any? %>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[850px] text-left text-sm">
+            <thead class="bg-[#F7F4EA] text-xs text-gray-600">
+              <tr>
+                <th class="px-5 py-4">MÃ ĐƠN</th>
+                <th class="px-5 py-4">NGƯỜI NHẬN</th>
+                <th class="px-5 py-4">NGÀY ĐẶT</th>
+                <th class="px-5 py-4">TỔNG TIỀN</th>
+                <th class="px-5 py-4">TRẠNG THÁI</th>
+                <th class="px-5 py-4 text-center">CHI TIẾT</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-[#E8E1D2]">
+              <% @orders.each do |order| %>
+                <tr class="hover:bg-[#FCFBF7]">
+
+                  <td class="px-5 py-4 font-semibold text-[#123D2B]">
+                    <%= order.order_number %>
+                  </td>
+
+                  <td class="px-5 py-4">
+                    <p class="font-medium text-gray-800">
+                      <%= order.recipient_name %>
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-500">
+                      <%= order.phone %>
+                    </p>
+                  </td>
+
+                  <td class="px-5 py-4 text-gray-600">
+                    <%= order.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+                  </td>
+
+                  <td class="px-5 py-4 font-semibold text-[#A83232]">
+                    <%= format_vnd(order.total) %>
+                  </td>
+
+                  <td class="px-5 py-4">
+                    <span class="border border-[#D8D0B8] px-3 py-1.5 text-xs text-[#8B6D2F]">
+                      <%= order_status_label(order.status) %>
+                    </span>
+                  </td>
+
+                  <td class="px-5 py-4 text-center">
+                    <%= link_to "XEM",
+                          admin_order_path(order),
+                          class: "font-semibold text-[#123D2B] hover:text-[#B99A55]" %>
+                  </td>
+
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+      <% else %>
+        <div class="px-5 py-16 text-center">
+          <p class="font-semibold text-[#123D2B]">
+            KHÔNG TÌM THẤY ĐƠN HÀNG
+          </p>
+
+          <p class="mt-2 text-sm text-gray-500">
+            Chưa có đơn hàng phù hợp với nội dung tìm kiếm.
+          </p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="mt-8 border-t border-[#D8D0B8] pt-6">
+      <%= link_to "← QUAY LẠI TRANG QUẢN TRỊ",
+            admin_root_path,
+            class: "inline-flex items-center text-sm font-semibold tracking-wider text-[#1B5B3A] transition hover:text-[#B99A55]" %>
+    </div>
+
+  </div>
+</div>
