@@ -24,6 +24,16 @@ module ApplicationHelper
     )
   end
 
+  def order_status_label(status)
+    {
+      "pending" => "Chờ xác nhận",
+      "confirmed" => "Đã xác nhận",
+      "shipping" => "Đang giao hàng",
+      "delivered" => "Đã giao hàng",
+      "cancelled" => "Đã hủy"
+    }.fetch(status.to_s, status.to_s.humanize)
+  end
+
   def nav_categories
     @nav_categories ||= Category.roots.includes(:children).order(:id)
   end

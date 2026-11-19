@@ -135,43 +135,179 @@
       </span>
     </div>
 
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    <% wishlist_ids = session[:wishlist] || [] %>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
       <% @featured_products.each do |product| %>
-        <article class="group bg-white border border-[#E2DDCE] hover:border-[#B99A55] hover:shadow-xl transition duration-300">
+        <%
+          in_wishlist = wishlist_ids.include?(product.id.to_s)
+          wishlist_path = in_wishlist ? remove_wishlist_item_path(product) : add_wishlist_item_path(product)
+          wishlist_method = in_wishlist ? :delete : :post
+        %>
 
-          <div class="aspect-square bg-[#F7F4EA] flex items-center justify-center p-4 overflow-hidden">
-            <% if product.image_url.present? %>
-              <%= image_tag product.image_url,
-                    alt: product.name,
-                    class: "w-full h-full object-contain group-hover:scale-105 transition duration-300" %>
-            <% else %>
-              <div class="text-center px-3">
-                <span class="text-4xl text-[#B99A55]" aria-hidden="true">✧</span>
-                <p class="text-xs text-gray-500 mt-2">
-                  Hình ảnh đang cập nhật
-                </p>
-              </div>
+        <article class="group bg-white border border-[#E5DFCF] hover:border-[#B99A55] hover:shadow-lg transition duration-300">
+
+          <!-- HÌNH ẢNH VÀ NÚT YÊU THÍCH -->
+          <div class="relative aspect-square bg-[#F7F4EA] p-4 md:p-6 flex items-center justify-center overflow-hidden">
+
+            <%= link_to product_path(product),
+                  class: "absolute inset-0 z-0 p-4 md:p-6 flex items-center justify-center" do %>
+
+              <% if product.image_url.present? %>
+                <%= image_tag product.image_url,
+                      alt: product.name,
+                      loading: "lazy",
+                      class: "w-full h-full object-contain group-hover:scale-105 transition duration-300" %>
+              <% else %>
+                <div class="text-center text-gray-400">
+                  <span class="text-4xl">✧</span>
+                  <p class="mt-2 text-xs">Hình ảnh đang cập nhật</p>
+                </div>
+              <% end %>
+
             <% end %>
+
+            <!-- NÚT YÊU THÍCH -->
+            <%= button_to wishlist_path,
+                  method: wishlist_method,
+                  form: { class: "absolute top-3 right-3 z-20 m-0" },
+                  class: "w-10 h-10 flex items-center justify-center rounded-full border border-red-200 bg-white/95 text-red-500 text-2xl shadow-md hover:bg-white hover:scale-110 transition cursor-pointer",
+                  title: in_wishlist ? "Bỏ yêu thích" : "Thêm vào yêu thích",
+                  aria: { label: in_wishlist ? "Bỏ yêu thích" : "Thêm vào yêu thích" } do %>
+              <%= in_wishlist ? "♥" : "♡" %>
+            <% end %>
+
+            <!-- NHÃN GIẢM GIÁ -->
+            <% if product.on_sale? %>
+              <span class="absolute top-3 left-3 z-10 pointer-events-none bg-[#A8873D] text-white text-[10px] font-semibold px-2 py-1">
+                -<%= product.discount_percent %>%
+              </span>
+            <% end %>
+
           </div>
 
-          <div class="p-4 md:p-5">
-            <p class="text-[10px] tracking-[0.15em] text-[#A8873D] font-semibold">
-              NHÂN SÂM ĐEN
+          <!-- THÔNG TIN SẢN PHẨM VÀ BỘ CHỌN SỐ LƯỢNG -->
+          <div class="p-3 md:p-4" data-controller="quantity">
+
+            <p class="text-[10px] md:text-xs tracking-wider text-[#A8873D] font-semibold">
+              <%= product.brand.presence || "BLACK GINSENG" %>
             </p>
 
-            <h3 class="font-semibold text-[#263B2E] mt-2 min-h-12 line-clamp-2">
-              <%= product.name %>
-            </h3>
+            <%= link_to product_path(product) do %>
+              <h3 class="mt-2 text-sm font-semibold text-[#123D2B] leading-5 line-clamp-2 min-h-10 hover:text-[#A8873D] transition">
+                <%= product.name %>
+              </h3>
+            <% end %>
 
-            <p class="text-lg font-bold text-[#1B5B3A] mt-3">
-              <%= format_vnd(product.price) %>
-            </p>
+            <!-- GIÁ -->
+            <div class="mt-3 flex flex-wrap items-center gap-2">
+              <span class="text-sm md:text-base font-bold text-[#1B5B3A]">
+                <%= format_vnd(product.price) %>
+              </span>
 
-            <%= link_to "XEM CHI TIẾT",
-                  product_path(product),
-                  class: "inline-flex items-center justify-center w-full mt-4 py-2.5 border border-[#123D2B] text-[#123D2B] text-xs font-semibold tracking-wider hover:bg-[#123D2B] hover:text-white transition" %>
+              <% if product.on_sale? %>
+                <span class="text-xs text-gray-400 line-through">
+                  <%= format_vnd(product.original_price) %>
+                </span>
+              <% end %>
+            </div>
+
+            <!-- SỐ LƯỢNG VÀ TÌNH TRẠNG -->
+            <div class="mt-3 flex items-center justify-between gap-1">
+
+              <% if product.in_stock? %>
+                <span class="inline-flex items-center gap-1.5 text-[10px] md:text-xs text-green-700 whitespace-nowrap">
+                  <span class="w-1.5 h-1.5 rounded-full bg-green-600"></span>
+                  Còn hàng
+                </span>
+
+                <!-- BỘ CHỌN SỐ LƯỢNG -->
+                <div class="flex items-center border border-[#D8D0B8] rounded-sm shrink-0">
+                  <button type="button"
+                          data-action="quantity#decrease"
+                          aria-label="Giảm số lượng"
+                          class="w-7 h-7 flex items-center justify-center text-[#123D2B] hover:bg-[#F7F4EA] transition">
+                    −
+                  </button>
+
+                  <input type="number"
+                         value="1"
+                         min="1"
+                         max="<%= product.stock %>"
+                         data-quantity-target="input"
+                         data-action="change->quantity#validate"
+                         aria-label="Số lượng sản phẩm"
+                         class="w-8 h-7 p-0 text-center text-xs font-semibold text-[#123D2B] border-x border-[#D8D0B8] focus:outline-none appearance-none">
+
+                  <button type="button"
+                          data-action="quantity#increase"
+                          aria-label="Tăng số lượng"
+                          class="w-7 h-7 flex items-center justify-center text-[#123D2B] hover:bg-[#F7F4EA] transition">
+                    +
+                  </button>
+                </div>
+
+              <% else %>
+                <span class="inline-flex items-center gap-1.5 text-[10px] md:text-xs text-red-600">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                  Hết hàng
+                </span>
+              <% end %>
+
+            </div>
+
+            <!-- HAI NÚT MUA HÀNG VÀ CHI TIẾT -->
+            <div class="mt-4 grid grid-cols-2 gap-2">
+
+              <% if product.in_stock? %>
+                <%= form_with url: add_cart_item_path(product),
+                              method: :post,
+                              local: true,
+                              class: "min-w-0" do %>
+
+                  <input type="hidden"
+                         name="quantity"
+                         value="1"
+                         data-quantity-target="formInput">
+
+                  <button type="submit"
+                          class="w-full min-h-10 px-2 py-2 flex items-center justify-center gap-1.5 bg-[#123D2B] text-white text-[9px] md:text-[11px] font-semibold tracking-wide hover:bg-[#1B5B3A] transition">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="15"
+                         height="15"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                      <circle cx="9" cy="21" r="1"></circle>
+                      <circle cx="20" cy="21" r="1"></circle>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+
+                    <span>THÊM VÀO GIỎ</span>
+                  </button>
+
+                <% end %>
+              <% else %>
+                <button type="button"
+                        disabled
+                        class="w-full min-h-10 px-2 py-2 bg-gray-300 text-gray-500 text-[9px] md:text-[11px] font-semibold cursor-not-allowed">
+                  HẾT HÀNG
+                </button>
+              <% end %>
+
+              <%= link_to product_path(product),
+                    class: "w-full min-h-10 px-2 py-2 flex items-center justify-center border border-[#123D2B] bg-white text-[#123D2B] text-[9px] md:text-[11px] font-semibold tracking-wide hover:bg-[#123D2B] hover:text-white transition" do %>
+                XEM CHI TIẾT
+              <% end %>
+
+            </div>
+
           </div>
-
         </article>
       <% end %>
     </div>

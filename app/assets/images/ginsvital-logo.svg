@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 120">
+  <g fill="none" stroke="#D4AF62" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M58 15 C42 30 43 51 58 69 C73 51 74 30 58 15Z"/>
+    <path d="M58 68 C47 80 43 91 43 104"/>
+    <path d="M58 68 C58 82 58 94 58 108"/>
+    <path d="M58 68 C70 80 75 92 76 104"/>
+    <path d="M58 42 C43 34 31 39 27 51 C40 56 50 53 58 42Z"/>
+    <path d="M58 42 C73 34 85 39 89 51 C76 56 66 53 58 42Z"/>
+  </g>
+  <text x="112" y="66" font-family="Georgia, serif" font-size="47" font-weight="bold" letter-spacing="2" fill="#D4AF62">GINSVITAL</text>
+  <text x="115" y="94" font-family="Arial, sans-serif" font-size="13" letter-spacing="3" fill="#FFFFFF">THE ESSENCE OF VITALITY</text>
+</svg>

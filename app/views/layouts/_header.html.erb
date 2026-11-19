@@ -1,120 +1,197 @@
-<header class="relative z-30 bg-[#E8DFC9] border-b border-[#D2C5A8]">
-  <div class="max-w-7xl mx-auto px-4 md:px-5">
+<% if authenticated? && Current.user&.is_admin? %>
 
-    <div class="grid grid-cols-1 items-center gap-3 py-3 lg:grid-cols-[450px_minmax(260px,1fr)_190px] lg:gap-7">
+  <!-- HEADER ADMIN -->
+  <header class="relative z-30 border-b border-[#D2C5A8] bg-[#E8DFC9]">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
 
       <!-- LOGO VÀ THƯƠNG HIỆU -->
-      <%= link_to root_path,
-            class: "flex min-w-0 items-center justify-center gap-3 lg:justify-start" do %>
-
+      <%= link_to admin_root_path, class: "flex items-center gap-3" do %>
         <%= image_tag "black-ginseng-emblem.png",
               alt: "Biểu tượng nhân sâm đen",
-              class: "h-[75px] w-[78px] md:h-[94px] md:w-[98px] shrink-0 object-contain" %>
+              class: "h-[65px] w-[68px] shrink-0 object-contain" %>
 
-        <div class="flex min-w-0 flex-col items-center">
-          <span class="whitespace-nowrap font-serif text-xl md:text-[29px] font-bold tracking-[0.065em] leading-tight text-[#123D2B]">
+        <div class="flex flex-col">
+          <span class="whitespace-nowrap font-serif text-xl font-bold tracking-[0.065em] text-[#123D2B] md:text-[27px]">
             BLACK GINSENG
           </span>
-
-          <span class="mt-2 md:mt-3 whitespace-nowrap text-[9px] md:text-[10px] font-medium tracking-[0.14em] text-[#987638]">
-            TỪ MAGASAM WISCONSIN - HOA KỲ
+          <span class="mt-1 text-[9px] font-medium tracking-[0.14em] text-[#987638]">
+            HỆ THỐNG QUẢN TRỊ
           </span>
         </div>
       <% end %>
 
-      <!-- TÌM KIẾM -->
-      <%= form_with url: products_path, method: :get,
-            class: "flex w-full" do |f| %>
+      <!-- ĐIỀU HƯỚNG ADMIN -->
+      <div class="flex items-center gap-5 md:gap-7">
 
-        <%= f.search_field :q,
-              placeholder: "Tìm kiếm sản phẩm...",
-              value: params[:q],
-              class: "h-[44px] w-full min-w-0 rounded-l-md border border-[#D6CCB6] border-r-0 bg-[#FFFEFA] px-4 text-sm text-[#24392D] placeholder:text-[#A69D8D] focus:border-[#A8873D] focus:outline-none focus:ring-1 focus:ring-[#A8873D]" %>
-
-        <%= button_tag type: "submit",
-              aria: { label: "Tìm kiếm" },
-              class: "flex h-[44px] w-[52px] shrink-0 items-center justify-center rounded-r-md bg-[#123D2B] text-white transition hover:bg-[#1B5B3A]" do %>
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="10.8" cy="10.8" r="6.8"></circle>
-            <path d="m16 16 4.5 4.5"></path>
-          </svg>
-        <% end %>
-      <% end %>
-
-      <!-- YÊU THÍCH VÀ GIỎ HÀNG -->
-      <div class="flex items-center justify-center gap-6 lg:justify-end">
-
-        <%= link_to wishlist_path,
-              class: "relative flex items-center gap-2 whitespace-nowrap text-[#244331] transition hover:text-[#A8873D]" do %>
-          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-            <path d="M20.8 8.8c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"></path>
-          </svg>
-          <span class="text-xs font-medium">Yêu thích</span>
-
-          <% wishlist_count = (session[:wishlist] || []).size %>
-          <% if wishlist_count > 0 %>
-            <span class="absolute -top-2 -right-3 min-w-5 h-5 rounded-full bg-[#A8873D] px-1 text-center text-[10px] leading-5 text-white">
-              <%= wishlist_count %>
-            </span>
-          <% end %>
+        <%= link_to admin_root_path,
+              class: "whitespace-nowrap text-sm font-semibold text-[#123D2B] transition hover:text-[#A8873D]" do %>
+          <span class="mr-1">⚙</span>
+          Trang quản trị
         <% end %>
 
-        <%= link_to cart_path,
-              class: "relative flex items-center gap-2 whitespace-nowrap text-[#244331] transition hover:text-[#A8873D]" do %>
-          <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-            <path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.5L22 7H6"></path>
-            <circle cx="10" cy="20" r="1.3"></circle>
-            <circle cx="18" cy="20" r="1.3"></circle>
-          </svg>
-          <span class="text-xs font-medium">Giỏ hàng</span>
-
-          <% cart_count = (session[:cart] || {}).values.sum { |quantity| quantity.to_i } %>
-          <% if cart_count > 0 %>
-            <span class="absolute -top-2 -right-3 min-w-5 h-5 rounded-full bg-[#A8873D] px-1 text-center text-[10px] leading-5 text-white">
-              <%= cart_count %>
-            </span>
-          <% end %>
-        <% end %>
+        <%= button_to "Đăng xuất",
+              session_path,
+              method: :delete,
+              class: "whitespace-nowrap text-sm font-semibold text-[#123D2B] transition hover:text-[#A8873D]" %>
 
       </div>
     </div>
-  </div>
-</header>
+  </header>
 
-<!-- THANH ĐIỀU HƯỚNG -->
-<nav class="sticky top-0 z-40 bg-[#123D2B] text-white shadow-sm">
-  <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto px-3 md:px-5 text-xs md:text-sm font-semibold">
+<% else %>
 
-    <%= link_to "TRANG CHỦ", root_path,
-          class: "whitespace-nowrap border-b-[3px] px-4 md:px-5 py-4 transition #{current_page?(root_path) ? 'border-[#D4AF62] text-[#E9CF8A]' : 'border-transparent hover:border-[#D4AF62] hover:text-[#E9CF8A]'}" %>
+  <!-- HEADER KHÁCH HÀNG -->
+  <header class="relative z-30 bg-[#E8DFC9] border-b border-[#D2C5A8]">
+    <div class="max-w-7xl mx-auto px-4 md:px-5">
 
-    <!-- DANH MỤC SẢN PHẨM -->
-    <div class="relative group">
-      <%= link_to products_path,
-            class: "flex items-center gap-2 whitespace-nowrap border-b-[3px] border-transparent px-4 md:px-5 py-4 transition hover:border-[#D4AF62] hover:text-[#E9CF8A]" do %>
-        SẢN PHẨM
-        <span class="text-xs">▾</span>
-      <% end %>
+      <div class="grid grid-cols-1 items-center gap-3 py-3 lg:grid-cols-[450px_minmax(260px,1fr)_280px] lg:gap-7">
 
-      <div class="absolute left-0 top-full hidden min-w-56 rounded-b-md border border-[#E2D8BB] bg-white py-2 shadow-xl group-hover:block group-focus-within:block">
+        <!-- LOGO VÀ THƯƠNG HIỆU -->
+        <%= link_to root_path,
+              class: "flex min-w-0 items-center justify-center gap-3 lg:justify-start" do %>
 
-        <% nav_categories.each do |category| %>
-          <% category.children.each do |child| %>
-            <%= link_to child.name, products_path(category_id: child.id),
-                  class: "block px-5 py-3 text-sm font-medium text-[#244331] transition hover:bg-[#F4F2E9]" %>
+          <%= image_tag "black-ginseng-emblem.png",
+                alt: "Biểu tượng nhân sâm đen",
+                class: "h-[75px] w-[78px] md:h-[94px] md:w-[98px] shrink-0 object-contain" %>
+
+          <div class="flex min-w-0 flex-col items-center">
+            <span class="whitespace-nowrap font-serif text-xl md:text-[29px] font-bold tracking-[0.065em] leading-tight text-[#123D2B]">
+              BLACK GINSENG
+            </span>
+
+            <span class="mt-2 md:mt-3 whitespace-nowrap text-[9px] md:text-[10px] font-medium tracking-[0.14em] text-[#987638]">
+              TỪ MAGASAM WISCONSIN - HOA KỲ
+            </span>
+          </div>
+        <% end %>
+
+        <!-- TÌM KIẾM -->
+        <%= form_with url: products_path, method: :get,
+              class: "flex w-full" do |f| %>
+
+          <%= f.search_field :q,
+                placeholder: "Tìm kiếm sản phẩm...",
+                value: params[:q],
+                class: "h-[44px] w-full min-w-0 rounded-l-md border border-[#D6CCB6] border-r-0 bg-[#FFFEFA] px-4 text-sm text-[#24392D] placeholder:text-[#A69D8D] focus:border-[#A8873D] focus:outline-none focus:ring-1 focus:ring-[#A8873D]" %>
+
+          <%= button_tag type: "submit",
+                aria: { label: "Tìm kiếm" },
+                class: "flex h-[44px] w-[52px] shrink-0 items-center justify-center rounded-r-md bg-[#123D2B] text-white transition hover:bg-[#1B5B3A]" do %>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="10.8" cy="10.8" r="6.8"></circle>
+              <path d="m16 16 4.5 4.5"></path>
+            </svg>
           <% end %>
         <% end %>
 
-        <%= link_to "Tất cả sản phẩm", products_path,
-              class: "block border-t border-[#E2D8BB] px-5 py-3 text-sm font-semibold text-[#A8873D] hover:bg-[#F4F2E9]" %>
+        <!-- TÀI KHOẢN, YÊU THÍCH VÀ GIỎ HÀNG -->
+        <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 lg:justify-end">
+
+          <% if authenticated? %>
+            <div class="flex items-center gap-2 text-[#244331]">
+              <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+              </svg>
+
+              <%= link_to "Tài khoản của tôi",
+                  profile_path,
+                  class: "whitespace-nowrap text-xs font-semibold text-[#123D2B] transition hover:text-[#A8873D]" %>
+            </div>
+
+            <%= button_to "Đăng xuất",
+                  session_path,
+                  method: :delete,
+                  class: "whitespace-nowrap text-xs font-semibold text-[#123D2B] hover:text-[#A8873D] transition" %>
+          <% else %>
+            <%= link_to "Đăng nhập",
+                  new_session_path,
+                  class: "whitespace-nowrap text-xs font-semibold text-[#123D2B] hover:text-[#A8873D] transition" %>
+
+            <%= link_to "Đăng ký",
+                  new_registration_path,
+                  class: "whitespace-nowrap bg-[#123D2B] px-3 py-2 text-xs font-semibold text-white hover:bg-[#1B5B3A] transition" %>
+          <% end %>
+
+          <!-- YÊU THÍCH -->
+          <%= link_to wishlist_path,
+                class: "relative flex items-center gap-2 whitespace-nowrap text-[#244331] transition hover:text-[#A8873D]" do %>
+
+            <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M20.8 8.8c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.8 4.8 0 0 1 12 6.1a4.8 4.8 0 0 1 8.8 2.7Z"></path>
+            </svg>
+
+            <span class="text-xs font-medium">Yêu thích</span>
+
+            <% wishlist_count = (session[:wishlist] || []).size %>
+            <% if wishlist_count > 0 %>
+              <span class="absolute -top-2 -right-3 min-w-5 h-5 rounded-full bg-[#A8873D] px-1 text-center text-[10px] leading-5 text-white">
+                <%= wishlist_count %>
+              </span>
+            <% end %>
+          <% end %>
+
+          <!-- GIỎ HÀNG -->
+          <%= link_to cart_path,
+                class: "relative flex items-center gap-2 whitespace-nowrap text-[#244331] transition hover:text-[#A8873D]" do %>
+
+            <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+              <path d="M3 3h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 1.9-1.5L22 7H6"></path>
+              <circle cx="10" cy="20" r="1.3"></circle>
+              <circle cx="18" cy="20" r="1.3"></circle>
+            </svg>
+
+            <span class="text-xs font-medium">Giỏ hàng</span>
+
+            <% cart_count = (session[:cart] || {}).values.sum { |quantity| quantity.to_i } %>
+            <% if cart_count > 0 %>
+              <span class="absolute -top-2 -right-3 min-w-5 h-5 rounded-full bg-[#A8873D] px-1 text-center text-[10px] leading-5 text-white">
+                <%= cart_count %>
+              </span>
+            <% end %>
+          <% end %>
+
+        </div>
       </div>
     </div>
+  </header>
 
-    <%= link_to "GIỚI THIỆU", root_path(anchor: "gioi-thieu"),
-          class: "whitespace-nowrap border-b-[3px] border-transparent px-4 md:px-5 py-4 transition hover:border-[#D4AF62] hover:text-[#E9CF8A]" %>
+  <!-- THANH ĐIỀU HƯỚNG -->
+  <nav class="sticky top-0 z-40 bg-[#123D2B] text-white shadow-sm">
+    <div class="max-w-7xl mx-auto flex items-center gap-1 overflow-x-auto px-3 md:px-5 text-xs md:text-sm font-semibold">
 
-    <%= link_to "LIÊN HỆ", root_path(anchor: "lien-he"),
-          class: "whitespace-nowrap border-b-[3px] border-transparent px-4 md:px-5 py-4 transition hover:border-[#D4AF62] hover:text-[#E9CF8A]" %>
+      <%= link_to "TRANG CHỦ", root_path,
+            class: "whitespace-nowrap border-b-[3px] px-4 md:px-5 py-4 transition #{current_page?(root_path) ? 'border-[#D4AF62] text-[#E9CF8A]' : 'border-transparent hover:border-[#D4AF62] hover:text-[#E9CF8A]'}" %>
 
-  </div>
-</nav>
+      <!-- DANH MỤC SẢN PHẨM -->
+      <div class="relative group">
+        <%= link_to products_path,
+              class: "flex items-center gap-2 whitespace-nowrap border-b-[3px] border-transparent px-4 md:px-5 py-4 transition hover:border-[#D4AF62] hover:text-[#E9CF8A]" do %>
+          SẢN PHẨM
+          <span class="text-xs">▾</span>
+        <% end %>
+
+        <div class="absolute left-0 top-full hidden min-w-56 rounded-b-md border border-[#E2D8BB] bg-white py-2 shadow-xl group-hover:block group-focus-within:block">
+
+          <% nav_categories.each do |category| %>
+            <% category.children.each do |child| %>
+              <%= link_to child.name, products_path(category_id: child.id),
+                    class: "block px-5 py-3 text-sm font-medium text-[#244331] transition hover:bg-[#F4F2E9]" %>
+            <% end %>
+          <% end %>
+
+          <%= link_to "Tất cả sản phẩm", products_path,
+                class: "block border-t border-[#E2D8BB] px-5 py-3 text-sm font-semibold text-[#A8873D] hover:bg-[#F4F2E9]" %>
+        </div>
+      </div>
+
+      <%= link_to "GIỚI THIỆU", root_path(anchor: "gioi-thieu"),
+            class: "whitespace-nowrap border-b-[3px] border-transparent px-4 md:px-5 py-4 transition hover:border-[#D4AF62] hover:text-[#E9CF8A]" %>
+
+      <%= link_to "LIÊN HỆ", root_path(anchor: "lien-he"),
+            class: "whitespace-nowrap border-b-[3px] border-transparent px-4 md:px-5 py-4 transition hover:border-[#D4AF62] hover:text-[#E9CF8A]" %>
+
+    </div>
+  </nav>
+
+<% end %>

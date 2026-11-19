@@ -1,19 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["input"]
+  static targets = ["input", "formInput"]
 
   increase() {
     const current = parseInt(this.inputTarget.value, 10) || 1
     const max = parseInt(this.inputTarget.max, 10) || 99
 
     this.inputTarget.value = Math.min(current + 1, max)
+
+    this.syncFormInput()
   }
 
   decrease() {
     const current = parseInt(this.inputTarget.value, 10) || 1
 
     this.inputTarget.value = Math.max(current - 1, 1)
+
+    this.syncFormInput()
   }
 
   validate() {
@@ -24,5 +28,13 @@ export default class extends Controller {
     if (value > max) value = max
 
     this.inputTarget.value = value
+
+    this.syncFormInput()
+  }
+
+  syncFormInput() {
+    if (this.hasFormInputTarget) {
+      this.formInputTarget.value = this.inputTarget.value
+    }
   }
 }
