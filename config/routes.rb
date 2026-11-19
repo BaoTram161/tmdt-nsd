@@ -1,9 +1,36 @@
 Rails.application.routes.draw do
+  # Tài khoản
+  resource :registration, only: %i[new create]
+  resource :session
+  resources :passwords, param: :token
+
+  resource :profile, only: %i[show update], controller: "profiles"
+  resources :addresses, only: %i[index new create edit update destroy]
+
+  # Đơn hàng của khách hàng
+  resources :orders, only: %i[index show]
+
+  # Quản trị Admin
+  namespace :admin do
+    root "dashboard#index"
+
+    # Quản lý đơn hàng
+    resources :orders, only: %i[index show update]
+
+    # Quản lý sản phẩm
+    resources :products, only: %i[index new create edit update] do
+      patch :toggle_active, on: :member
+    end
+
+    # Quản lý khách hàng
+    resources :customers, only: :index
+  end
+
   root "home#index"
 
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Sản phẩm
+  # Sản phẩm của khách hàng
   resources :products, only: %i[index show]
 
   # Giỏ hàng
@@ -20,6 +47,9 @@ Rails.application.routes.draw do
   delete "cart/items/:product_id",
          to: "carts#remove",
          as: :remove_cart_item
+
+  # Thanh toán
+  resource :checkout, only: %i[show create]
 
   # Danh sách yêu thích
   resource :wishlist, only: :show
