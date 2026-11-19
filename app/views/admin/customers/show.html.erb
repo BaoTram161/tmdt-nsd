@@ -1,0 +1,184 @@
+<% content_for :title, "Chi tiết khách hàng | BLACK GINSENG" %>
+
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-8 md:px-8">
+  <div class="mx-auto max-w-6xl">
+
+    <!-- Tiêu đề -->
+    <div class="mb-8">
+      <div>
+        <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#B99A55]">
+          BLACK GINSENG / QUẢN TRỊ
+        </p>
+        <h1 class="text-2xl font-semibold tracking-tight text-[#123D2B] md:text-3xl">
+          CHI TIẾT KHÁCH HÀNG
+        </h1>
+        <p class="mt-2 text-sm text-gray-500">
+          Thông tin tài khoản và lịch sử mua hàng
+        </p>
+      </div>
+    </div>
+
+    <!-- Thông tin tài khoản -->
+    <section class="mb-6 border border-[#D8D0B8] bg-white">
+      <div class="border-b border-[#EAE5D9] px-5 py-4 md:px-7">
+        <h2 class="text-sm font-semibold tracking-wide text-[#123D2B]">
+          THÔNG TIN TÀI KHOẢN
+        </h2>
+      </div>
+
+      <div class="grid gap-6 p-5 sm:grid-cols-2 md:grid-cols-3 md:p-7">
+        <div>
+          <p class="text-xs font-medium text-gray-400">HỌ VÀ TÊN</p>
+          <p class="mt-2 font-semibold text-[#123D2B]">
+            <%= @customer.full_name.presence || "Chưa cập nhật" %>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-400">EMAIL</p>
+          <p class="mt-2 break-all text-sm text-gray-800">
+            <%= @customer.email_address %>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-400">SỐ ĐIỆN THOẠI</p>
+          <p class="mt-2 text-sm text-gray-800">
+            <%= @customer.phone.presence || "Chưa cập nhật" %>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-400">NGÀY ĐĂNG KÝ</p>
+          <p class="mt-2 text-sm text-gray-800">
+            <%= @customer.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-400">TỔNG ĐƠN HÀNG</p>
+          <p class="mt-2 text-lg font-semibold tabular-nums text-[#123D2B]">
+            <%= @orders.size %>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Địa chỉ -->
+    <section class="mb-6 border border-[#D8D0B8] bg-white">
+      <div class="flex items-center justify-between border-b border-[#EAE5D9] px-5 py-4 md:px-7">
+        <h2 class="text-sm font-semibold tracking-wide text-[#123D2B]">
+          ĐỊA CHỈ ĐÃ LƯU
+        </h2>
+        <span class="text-xs text-gray-400">
+          <%= @addresses.size %> địa chỉ
+        </span>
+      </div>
+
+      <% if @addresses.any? %>
+        <div class="grid gap-4 p-5 md:grid-cols-2 md:p-7">
+          <% @addresses.each do |address| %>
+            <div class="border border-[#EAE5D9] p-4">
+              <div class="mb-3 flex flex-wrap items-center gap-3">
+                <span class="text-sm font-semibold text-[#123D2B]">
+                  <%= address.label %>
+                </span>
+
+                <% if address.is_default? %>
+                  <span class="bg-[#EAF2EC] px-2 py-1 text-[10px] font-semibold text-[#1B5B3A]">
+                    MẶC ĐỊNH
+                  </span>
+                <% end %>
+              </div>
+
+              <p class="text-sm font-medium text-gray-800">
+                <%= address.recipient_name %>
+              </p>
+              <p class="mt-1 text-sm text-gray-500">
+                <%= address.phone %>
+              </p>
+              <p class="mt-2 text-sm leading-6 text-gray-600">
+                <%= [address.street_address, address.ward, address.province].compact_blank.join(", ") %>
+              </p>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="px-5 py-8 text-center text-sm text-gray-400">
+          Khách hàng chưa lưu địa chỉ giao hàng.
+        </p>
+      <% end %>
+    </section>
+
+    <!-- Lịch sử đơn hàng -->
+    <section class="border border-[#D8D0B8] bg-white">
+      <div class="flex items-center justify-between border-b border-[#EAE5D9] px-5 py-4 md:px-7">
+        <h2 class="text-sm font-semibold tracking-wide text-[#123D2B]">
+          LỊCH SỬ ĐƠN HÀNG
+        </h2>
+        <span class="text-xs text-gray-400">
+          <%= @orders.size %> đơn hàng
+        </span>
+      </div>
+
+      <% if @orders.any? %>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[680px] text-left text-sm">
+            <thead class="bg-[#F7F4EA] text-xs text-gray-500">
+              <tr>
+                <th class="px-5 py-4 font-semibold">MÃ ĐƠN</th>
+                <th class="px-5 py-4 font-semibold">NGÀY ĐẶT</th>
+                <th class="px-5 py-4 font-semibold">TRẠNG THÁI</th>
+                <th class="px-5 py-4 text-right font-semibold">TỔNG TIỀN</th>
+                <th class="px-5 py-4 text-right font-semibold">CHI TIẾT</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-[#EAE5D9]">
+              <% @orders.each do |order| %>
+                <tr class="transition hover:bg-[#FCFBF7]">
+                  <td class="px-5 py-4 font-semibold text-[#123D2B]">
+                    <%= order.order_number %>
+                  </td>
+                  <td class="px-5 py-4 text-gray-600">
+                    <%= order.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y") %>
+                  </td>
+                  <td class="px-5 py-4">
+                    <span class="inline-flex bg-[#F7F4EA] px-3 py-1.5 text-xs font-medium text-[#8B6D2F]">
+                      <%= order_status_label(order.status) %>
+                    </span>
+                  </td>
+                  <td class="px-5 py-4 text-right font-semibold text-[#A83232]">
+                    <%= format_vnd(order.total) %>
+                  </td>
+                  <td class="px-5 py-4 text-right">
+                    <%= link_to "Xem đơn",
+                          admin_order_path(order),
+                          class: "font-semibold text-[#1B5B3A] hover:text-[#B99A55]" %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <div class="px-5 py-12 text-center">
+          <p class="text-sm font-medium text-[#123D2B]">
+            Chưa có đơn hàng
+          </p>
+          <p class="mt-2 text-xs text-gray-400">
+            Lịch sử mua hàng của khách hàng sẽ hiển thị tại đây.
+          </p>
+        </div>
+      <% end %>
+    </section>
+
+    <!-- Quay lại danh sách khách hàng -->
+    <div class="mt-8 border-t border-[#D8D0B8] pt-6">
+      <%= link_to "← QUAY LẠI DANH SÁCH KHÁCH HÀNG",
+            admin_customers_path,
+            class: "inline-flex items-center text-sm font-semibold tracking-wider text-[#1B5B3A] transition hover:text-[#B99A55]" %>
+    </div>
+
+  </div>
+</div>

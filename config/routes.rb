@@ -23,7 +23,7 @@ Rails.application.routes.draw do
     end
 
     # Quản lý khách hàng
-    resources :customers, only: :index
+    resources :customers, only: %i[index show]
   end
 
   root "home#index"

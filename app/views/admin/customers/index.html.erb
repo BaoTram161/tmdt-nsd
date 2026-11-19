@@ -3,6 +3,7 @@
 <div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:px-8">
   <div class="mx-auto max-w-7xl">
 
+    <!-- Tiêu đề -->
     <div class="mb-8">
       <p class="mb-2 text-xs font-semibold tracking-[0.25em] text-[#B99A55]">
         BLACK GINSENG
@@ -13,67 +14,120 @@
       </h1>
 
       <p class="mt-2 text-sm text-gray-600">
-        Danh sách tài khoản khách hàng đã đăng ký trên hệ thống.
+        Theo dõi thông tin tài khoản và lịch sử mua hàng của khách hàng.
       </p>
     </div>
 
     <!-- Tổng quan -->
-    <div class="mb-6 border border-[#D8D0B8] bg-white p-5">
-      <div>
-        <p class="text-sm text-gray-500">Tổng số khách hàng</p>
+    <div class="mb-6 border border-[#D8D0B8] bg-white p-5 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm text-gray-500">Tổng số khách hàng</p>
 
-        <p class="mt-1 text-2xl font-bold text-[#123D2B]">
-          <%= @customers.size %>
-        </p>
+          <p class="mt-2 text-3xl font-bold tabular-nums text-[#123D2B]">
+            <%= @customers.size %>
+          </p>
+        </div>
+
+        <div class="flex h-12 w-12 items-center justify-center bg-[#EAF2EC] text-[#1B5B3A]">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="1.7"
+               class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M20 8v6m3-3h-6"/>
+          </svg>
+        </div>
       </div>
     </div>
 
     <!-- Danh sách khách hàng -->
-    <section class="border border-[#D8D0B8] bg-white shadow-sm">
+    <section class="overflow-hidden border border-[#D8D0B8] bg-white shadow-sm">
 
       <div class="border-b border-[#D8D0B8] p-5">
-        <h2 class="font-semibold text-[#123D2B]">
-          DANH SÁCH KHÁCH HÀNG
-        </h2>
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="font-semibold text-[#123D2B]">
+            DANH SÁCH KHÁCH HÀNG
+          </h2>
 
+          <span class="text-xs text-gray-400">
+            <%= @customers.size %> kết quả
+          </span>
+        </div>
+
+        <!-- Tìm kiếm -->
         <%= form_with url: admin_customers_path,
               method: :get,
               class: "mt-4 flex flex-col gap-3 sm:flex-row" do |form| %>
 
-          <%= form.text_field :q,
-                value: params[:q],
-                placeholder: "Tìm theo tên, email hoặc số điện thoại...",
-                class: "w-full border border-[#D8D0B8] bg-[#FCFBF7] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          <div class="relative flex-1">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24"
+                 fill="none"
+                 stroke="currentColor"
+                 stroke-width="1.7"
+                 class="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400">
+              <circle cx="11" cy="11" r="7"/>
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="m20 20-4-4"/>
+            </svg>
+
+            <%= form.text_field :q,
+                  value: params[:q],
+                  placeholder: "Tìm theo tên, email hoặc số điện thoại...",
+                  class: "w-full border border-[#D8D0B8] bg-[#FCFBF7] py-3 pl-11 pr-4 text-sm outline-none transition focus:border-[#123D2B] focus:ring-1 focus:ring-[#123D2B]" %>
+          </div>
 
           <%= form.submit "TÌM KIẾM",
                 class: "cursor-pointer bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
 
-          <%= link_to "XÓA TÌM KIẾM",
-                admin_customers_path,
-                class: "border border-[#D8D0B8] px-6 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] hover:bg-[#F7F4EA]" %>
+          <% if params[:q].present? %>
+            <%= link_to "XÓA TÌM KIẾM",
+                  admin_customers_path,
+                  class: "border border-[#D8D0B8] px-6 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] transition hover:bg-[#F7F4EA]" %>
+          <% end %>
         <% end %>
       </div>
 
       <% if @customers.any? %>
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[850px] text-left text-sm">
+          <table class="w-full min-w-[1000px] text-left text-sm">
 
             <thead class="bg-[#F7F4EA] text-xs text-gray-600">
               <tr>
                 <th class="px-5 py-4 font-semibold">KHÁCH HÀNG</th>
                 <th class="px-5 py-4 font-semibold">EMAIL</th>
                 <th class="px-5 py-4 font-semibold">SỐ ĐIỆN THOẠI</th>
-                <th class="px-5 py-4 font-semibold">SỐ ĐƠN HÀNG</th>
+                <th class="px-5 py-4 text-center font-semibold">SỐ ĐƠN HÀNG</th>
                 <th class="px-5 py-4 font-semibold">NGÀY ĐĂNG KÝ</th>
+                <th class="px-5 py-4 text-center font-semibold">THAO TÁC</th>
               </tr>
             </thead>
 
             <tbody class="divide-y divide-[#E8E1D2]">
               <% @customers.each do |customer| %>
-                <tr class="transition hover:bg-[#FCFBF7]">
+                <tr class="transition-colors hover:bg-[#FCFBF7]">
 
-                  <td class="px-5 py-4 font-semibold text-[#123D2B]">
-                    <%= customer.full_name.presence || "Chưa cập nhật" %>
+                  <td class="px-5 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="flex h-10 w-10 shrink-0 items-center justify-center bg-[#EAF2EC] text-sm font-bold text-[#1B5B3A]">
+                        <%= customer.full_name.present? ? customer.full_name.first.upcase : "K" %>
+                      </div>
+
+                      <div>
+                        <p class="font-semibold text-[#123D2B]">
+                          <%= customer.full_name.presence || "Chưa cập nhật" %>
+                        </p>
+                        <p class="mt-1 text-xs text-gray-400">
+                          Khách hàng
+                        </p>
+                      </div>
+                    </div>
                   </td>
 
                   <td class="px-5 py-4 text-gray-600">
@@ -84,12 +138,21 @@
                     <%= customer.phone.presence || "Chưa cập nhật" %>
                   </td>
 
-                  <td class="px-5 py-4 font-semibold text-[#123D2B]">
-                    <%= customer.orders.size %>
+                  <td class="px-5 py-4 text-center">
+                    <span class="inline-flex min-w-9 items-center justify-center bg-[#F7F4EA] px-3 py-1.5 font-semibold tabular-nums text-[#123D2B]">
+                      <%= customer.orders.size %>
+                    </span>
                   </td>
 
                   <td class="px-5 py-4 text-gray-600">
                     <%= customer.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+                  </td>
+
+                  <!-- Thao tác -->
+                  <td class="px-5 py-4 text-center">
+                    <%= link_to "XEM CHI TIẾT",
+                          admin_customer_path(customer),
+                          class: "inline-flex min-w-[150px] items-center justify-center border border-[#123D2B] bg-white px-4 py-3 text-sm font-bold tracking-wide text-[#123D2B] transition hover:bg-[#123D2B] hover:text-white" %>
                   </td>
 
                 </tr>
@@ -108,6 +171,12 @@
           <p class="mt-2 text-sm text-gray-500">
             Chưa có tài khoản phù hợp với nội dung tìm kiếm.
           </p>
+
+          <% if params[:q].present? %>
+            <%= link_to "XÓA BỘ LỌC",
+                  admin_customers_path,
+                  class: "mt-5 inline-flex bg-[#123D2B] px-5 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+          <% end %>
         </div>
       <% end %>
 
@@ -120,6 +189,7 @@
             class: "inline-flex items-center text-sm font-semibold tracking-wider text-[#1B5B3A] transition hover:text-[#B99A55]" %>
     </div>
 
+    <!-- Footer -->
     <div class="mt-8 border-t border-[#D8D0B8] pt-5 text-center text-xs text-gray-500">
       BLACK GINSENG · HỆ THỐNG QUẢN TRỊ CỬA HÀNG
     </div>
