@@ -1,0 +1,156 @@
+class CheckoutsController < ApplicationController
+  SHIPPING_FEE = 20_000
+
+  class CheckoutError < StandardError; end
+
+  def show
+    quantities = normalized_cart
+
+    if quantities.empty?
+      return redirect_to cart_path, alert: "Giỏ hàng của bạn đang trống."
+    end
+
+    products = Product.where(id: quantities.keys).index_by(&:id)
+
+    if products.size != quantities.size
+      raise CheckoutError, "Một số sản phẩm trong giỏ hàng không còn tồn tại."
+    end
+
+    @cart_items = quantities.map do |product_id, quantity|
+      product = products[product_id]
+
+      unless product.active?
+        raise CheckoutError, "#{product.name} hiện không còn kinh doanh."
+      end
+
+      if quantity > product.stock.to_i
+        raise CheckoutError, "#{product.name} không đủ số lượng trong kho."
+      end
+
+      [product, quantity]
+    end
+
+    @addresses = Current.user.addresses.order(
+      is_default: :desc,
+      created_at: :desc
+    )
+
+    @selected_address_id =
+      params[:address_id].presence ||
+      @addresses.find_by(is_default: true)&.id ||
+      @addresses.first&.id
+
+    @subtotal = calculate_subtotal(@cart_items)
+    @shipping_fee = SHIPPING_FEE
+    @total = @subtotal + @shipping_fee
+  rescue CheckoutError => e
+    redirect_to cart_path, alert: e.message
+  end
+
+  def create
+    address = Current.user.addresses.find_by(id: params[:address_id])
+
+    unless address
+      return redirect_to checkout_path,
+                         alert: "Vui lòng chọn địa chỉ giao hàng."
+    end
+
+    quantities = normalized_cart
+
+    if quantities.empty?
+      return redirect_to cart_path, alert: "Giỏ hàng của bạn đang trống."
+    end
+
+    ActiveRecord::Base.transaction do
+      products = Product.lock.where(id: quantities.keys).index_by(&:id)
+
+      if products.size != quantities.size
+        raise CheckoutError, "Một số sản phẩm không còn tồn tại."
+      end
+
+      cart_items = quantities.map do |product_id, quantity|
+        product = products[product_id]
+
+        unless product.active?
+          raise CheckoutError, "#{product.name} hiện không còn kinh doanh."
+        end
+
+        if product.stock.to_i < quantity
+          raise CheckoutError,
+                "#{product.name} chỉ còn #{product.stock} sản phẩm trong kho."
+        end
+
+        [product, quantity]
+      end
+
+      subtotal = calculate_subtotal(cart_items)
+
+      @order = Current.user.orders.create!(
+        recipient_name: address.recipient_name,
+        phone: address.phone,
+        province: address.province,
+        ward: address.ward,
+        street_address: address.street_address,
+        subtotal: subtotal,
+        shipping_fee: SHIPPING_FEE,
+        total: subtotal + SHIPPING_FEE,
+        payment_method: :cod,
+        payment_status: :unpaid,
+        status: :pending,
+        note: params[:note].to_s.strip.presence
+      )
+
+      cart_items.each do |product, quantity|
+        unit_price = product.price
+
+        @order.order_items.create!(
+          product: product,
+          product_name: product.name,
+          product_image: product.image_url,
+          quantity: quantity,
+          unit_price: unit_price,
+          total_price: unit_price * quantity
+        )
+
+        product.update!(
+          stock: product.stock - quantity,
+          sold_count: product.sold_count + quantity
+        )
+      end
+    end
+
+    session.delete(:cart)
+
+    render :create, status: :created
+  rescue CheckoutError => e
+    redirect_to checkout_path, alert: e.message
+  rescue ActiveRecord::RecordInvalid => e
+    redirect_to checkout_path,
+                alert: "Không thể tạo đơn hàng: #{e.record.errors.full_messages.to_sentence}"
+  end
+
+  private
+
+  def normalized_cart
+    cart = session[:cart] || {}
+
+    cart.each_with_object({}) do |(product_id, quantity), result|
+      id = Integer(product_id, 10)
+      amount = Integer(quantity)
+
+      if id <= 0 || amount <= 0
+        raise CheckoutError, "Số lượng sản phẩm không hợp lệ."
+      end
+
+      result[id] = amount
+    rescue ArgumentError, TypeError
+      raise CheckoutError, "Thông tin giỏ hàng không hợp lệ."
+    end
+  end
+
+  def calculate_subtotal(cart_items)
+    cart_items.sum do |product, quantity|
+      product.price * quantity
+    end
+  end
+end

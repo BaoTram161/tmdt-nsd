@@ -1,0 +1,177 @@
+<% content_for :title, "Chi tiết đơn hàng | BLACK GINSENG" %>
+
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:py-14">
+  <div class="mx-auto max-w-5xl">
+
+    <div class="mb-8">
+      <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#B99A55]">
+        BLACK GINSENG
+      </p>
+
+      <h1 class="text-2xl font-semibold tracking-wide text-[#123D2B] md:text-3xl">
+        CHI TIẾT ĐƠN HÀNG
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-500">
+        Thông tin chi tiết về đơn hàng của bạn.
+      </p>
+    </div>
+
+    <!-- Thông tin mã đơn và trạng thái -->
+    <div class="mb-6 border border-[#D8D0B8] bg-white">
+      <div class="flex flex-col gap-4 border-b border-[#D8D0B8] bg-[#EAF2EC] px-5 py-5 sm:flex-row sm:items-center sm:justify-between md:px-7">
+        <div>
+          <p class="text-xs text-gray-500">MÃ ĐƠN HÀNG</p>
+          <p class="mt-1 text-lg font-semibold tracking-wide text-[#123D2B]">
+            <%= @order.order_number %>
+          </p>
+        </div>
+
+        <span class="w-fit border border-[#B99A55] bg-white px-4 py-2 text-xs font-semibold text-[#8B6D2F]">
+          <%= order_status_label(@order.status) %>
+        </span>
+      </div>
+
+      <div class="grid gap-4 px-5 py-5 text-sm sm:grid-cols-2 md:px-7">
+        <div>
+          <p class="text-xs text-gray-500">NGÀY ĐẶT HÀNG</p>
+          <p class="mt-1 font-medium text-gray-800">
+            <%= @order.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">PHƯƠNG THỨC THANH TOÁN</p>
+          <p class="mt-1 font-medium text-gray-800">
+            Thanh toán khi nhận hàng (COD)
+          </p>
+          <p class="mt-1 text-xs text-[#8B6D2F]">
+            <%= @order.unpaid? ? "Chưa thanh toán" : "Đã thanh toán" %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông tin nhận hàng -->
+    <div class="mb-6 border border-[#D8D0B8] bg-white p-5 md:p-7">
+      <h2 class="mb-5 text-sm font-semibold tracking-wide text-[#123D2B]">
+        THÔNG TIN NHẬN HÀNG
+      </h2>
+
+      <div class="grid gap-4 text-sm sm:grid-cols-2">
+        <div>
+          <p class="text-xs text-gray-500">NGƯỜI NHẬN</p>
+          <p class="mt-1 font-medium text-gray-800">
+            <%= @order.recipient_name %>
+          </p>
+        </div>
+
+        <div>
+          <p class="text-xs text-gray-500">SỐ ĐIỆN THOẠI</p>
+          <p class="mt-1 font-medium text-gray-800">
+            <%= @order.phone %>
+          </p>
+        </div>
+
+        <div class="sm:col-span-2">
+          <p class="text-xs text-gray-500">ĐỊA CHỈ GIAO HÀNG</p>
+          <p class="mt-1 font-medium leading-6 text-gray-800">
+            <%= [@order.street_address, @order.ward, @order.province].compact_blank.join(", ") %>
+          </p>
+        </div>
+
+        <% if @order.note.present? %>
+          <div class="sm:col-span-2">
+            <p class="text-xs text-gray-500">GHI CHÚ</p>
+            <p class="mt-1 leading-6 text-gray-800">
+              <%= @order.note %>
+            </p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Danh sách sản phẩm -->
+    <div class="mb-6 border border-[#D8D0B8] bg-white p-5 md:p-7">
+      <h2 class="mb-5 text-sm font-semibold tracking-wide text-[#123D2B]">
+        SẢN PHẨM ĐÃ ĐẶT
+      </h2>
+
+      <div class="space-y-5">
+        <% @order.order_items.each do |item| %>
+          <div class="flex gap-4">
+            <% if item.product_image.present? %>
+              <%= image_tag item.product_image,
+                  class: "h-20 w-20 shrink-0 border border-[#D8D0B8] object-cover",
+                  alt: item.product_name %>
+            <% else %>
+              <div class="flex h-20 w-20 shrink-0 items-center justify-center border border-[#D8D0B8] bg-[#F7F4EA] text-[10px] text-gray-400">
+                BLACK GINSENG
+              </div>
+            <% end %>
+
+            <div class="min-w-0 flex-1">
+              <p class="font-medium text-[#123D2B]">
+                <%= item.product_name %>
+              </p>
+
+              <p class="mt-1 text-sm text-gray-500">
+                Đơn giá:
+                <%= format_vnd(item.unit_price) %>
+              </p>
+
+              <p class="mt-1 text-sm text-gray-500">
+                Số lượng: <%= item.quantity %>
+              </p>
+
+              <p class="mt-2 text-sm font-semibold text-[#A83232]">
+                <%= format_vnd(item.total_price) %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Tổng thanh toán -->
+    <div class="mb-8 border border-[#D8D0B8] bg-white p-5 md:p-7">
+      <h2 class="mb-5 text-sm font-semibold tracking-wide text-[#123D2B]">
+        TỔNG THANH TOÁN
+      </h2>
+
+      <div class="ml-auto max-w-sm space-y-3 text-sm">
+        <div class="flex justify-between text-gray-600">
+          <span>Tiền hàng</span>
+          <span>
+            <%= format_vnd(@order.subtotal) %>
+          </span>
+        </div>
+
+        <div class="flex justify-between text-gray-600">
+          <span>Phí vận chuyển</span>
+          <span>
+            <%= format_vnd(@order.shipping_fee) %>
+          </span>
+        </div>
+
+        <div class="flex justify-between border-t border-[#D8D0B8] pt-4 text-base font-semibold text-[#123D2B]">
+          <span>Tổng thanh toán</span>
+          <span class="text-[#A83232]">
+            <%= format_vnd(@order.total) %>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <%= link_to "← DANH SÁCH ĐƠN HÀNG",
+          orders_path,
+          class: "border border-[#123D2B] px-6 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] transition hover:bg-[#123D2B] hover:text-white" %>
+
+      <%= link_to "TIẾP TỤC MUA SẮM",
+          products_path,
+          class: "bg-[#123D2B] px-6 py-3 text-center text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+    </div>
+
+  </div>
+</div>
