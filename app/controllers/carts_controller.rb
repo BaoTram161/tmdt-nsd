@@ -1,4 +1,6 @@
 class CartsController < ApplicationController
+  SHIPPING_FEE = 20_000
+
   def show
     cart = session[:cart] || {}
 
@@ -9,9 +11,46 @@ class CartsController < ApplicationController
       [ product, quantity.to_i ] if product
     end
 
-    @cart_total = @cart_items.sum do |product, quantity|
-      product.price * quantity
+    @cart_total = calculate_cart_total(@cart_items)
+    @shipping_fee = SHIPPING_FEE
+    @discount_amount = 0.to_d
+
+    @available_promotions = []
+
+    if @cart_items.empty?
+      session.delete(:promotion_code)
+    else
+      @available_promotions = PromotionCode.active.order(created_at: :desc).select do |promotion|
+        promotion.eligibility_error(
+          user: Current.user,
+          subtotal: @cart_total
+        ).nil?
+      end
+
+      if session[:promotion_code].present?
+        promotion = PromotionCode.find_by(code: session[:promotion_code])
+
+        error =
+          if promotion.nil?
+            "Mã khuyến mãi không tồn tại."
+          else
+            promotion.eligibility_error(
+              user: Current.user,
+              subtotal: @cart_total
+            )
+          end
+
+        if error.present?
+          session.delete(:promotion_code)
+          flash.now[:alert] = error
+        else
+          @promotion_code = promotion
+          @discount_amount = promotion.calculate_discount(@cart_total)
+        end
+      end
     end
+
+    @grand_total = @cart_total - @discount_amount + @shipping_fee
   end
 
   def add
@@ -106,7 +145,63 @@ class CartsController < ApplicationController
                 notice: "Đã xóa sản phẩm khỏi giỏ hàng."
   end
 
+  def apply_promotion
+    code = params[:code].to_s.strip.upcase
+
+    if code.blank?
+      return redirect_to cart_path,
+                         alert: "Vui lòng chọn mã khuyến mãi."
+    end
+
+    promotion = PromotionCode.find_by(code: code)
+
+    unless promotion
+      return redirect_to cart_path,
+                         alert: "Mã khuyến mãi không tồn tại."
+    end
+
+    cart = session[:cart] || {}
+    products = Product.where(id: cart.keys).index_by(&:id)
+
+    subtotal = cart.sum do |product_id, quantity|
+      product = products[product_id.to_i]
+      product ? product.price * quantity.to_i : 0
+    end
+
+    if subtotal <= 0
+      return redirect_to cart_path,
+                         alert: "Giỏ hàng của bạn đang trống."
+    end
+
+    error = promotion.eligibility_error(
+      user: Current.user,
+      subtotal: subtotal
+    )
+
+    if error.present?
+      return redirect_to cart_path, alert: error
+    end
+
+    session[:promotion_code] = promotion.code
+
+    redirect_to cart_path,
+                notice: "Đã áp dụng mã #{promotion.code} thành công."
+  end
+
+  def remove_promotion
+    session.delete(:promotion_code)
+
+    redirect_to cart_path,
+                notice: "Đã gỡ mã khuyến mãi."
+  end
+
   private
+
+  def calculate_cart_total(cart_items)
+    cart_items.sum do |product, quantity|
+      product.price * quantity
+    end
+  end
 
   def parse_quantity(value)
     return 1 if value.blank?

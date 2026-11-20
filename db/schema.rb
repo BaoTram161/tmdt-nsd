@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_18_094315) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_20_110959) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -81,6 +81,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_094315) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "payment_status", default: "unpaid", null: false
+    t.string "promotion_code"
+    t.decimal "discount_amount", precision: 12, scale: 2, default: "0.0", null: false
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["payment_status"], name: "index_orders_on_payment_status"
     t.index ["user_id"], name: "index_orders_on_user_id"
@@ -106,6 +108,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_094315) do
     t.index ["category_id"], name: "index_products_on_category_id"
   end
 
+  create_table "promotion_codes", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "discount_type", null: false
+    t.decimal "discount_value", precision: 12, scale: 2, null: false
+    t.decimal "minimum_order_value", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "maximum_discount", precision: 12, scale: 2
+    t.integer "usage_limit"
+    t.integer "per_user_limit"
+    t.integer "used_count", default: 0, null: false
+    t.datetime "starts_at"
+    t.datetime "expires_at"
+    t.boolean "active", default: true, null: false
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_promotion_codes_on_code", unique: true
+  end
+
   create_table "provinces", force: :cascade do |t|
     t.string "code", null: false
     t.string "name", null: false
@@ -114,6 +134,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_094315) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_provinces_on_code", unique: true
+  end
+
+  create_table "reviews", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "product_id", null: false
+    t.integer "rating", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_reviews_on_product_id"
+    t.index ["user_id", "product_id"], name: "index_reviews_on_user_id_and_product_id", unique: true
+    t.index ["user_id"], name: "index_reviews_on_user_id"
+    t.check_constraint "rating >= 1 AND rating <= 5", name: "reviews_rating_between_1_and_5"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -143,5 +176,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_18_094315) do
   add_foreign_key "order_items", "products", on_delete: :nullify
   add_foreign_key "orders", "users"
   add_foreign_key "products", "categories"
+  add_foreign_key "reviews", "products"
+  add_foreign_key "reviews", "users"
   add_foreign_key "sessions", "users"
 end
