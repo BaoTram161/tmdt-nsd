@@ -1,0 +1,165 @@
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:px-8">
+  <div class="mx-auto max-w-4xl">
+
+    <div class="mb-8">
+      <p class="mb-2 text-xs font-semibold tracking-[0.25em] text-[#B99A55]">
+        BLACK GINSENG
+      </p>
+      <h1 class="text-3xl font-bold tracking-wide text-[#123D2B]">
+        <%= page_title %>
+      </h1>
+      <p class="mt-2 text-sm text-gray-500">
+        Thiết lập thông tin và điều kiện áp dụng mã ưu đãi.
+      </p>
+    </div>
+
+    <%= form_with model: [:admin, promotion_code], class: "space-y-6" do |form| %>
+
+      <% if promotion_code.errors.any? %>
+        <div class="border border-red-200 bg-red-50 p-5 text-sm text-red-700">
+          <p class="mb-2 font-semibold">
+            Không thể lưu mã khuyến mãi. Vui lòng kiểm tra:
+          </p>
+          <ul class="list-inside list-disc space-y-1">
+            <% promotion_code.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <section class="border border-[#D8D0B8] bg-white p-6 md:p-8">
+        <h2 class="mb-6 border-b border-[#E8E1D2] pb-4 font-semibold text-[#123D2B]">
+          THÔNG TIN MÃ KHUYẾN MÃI
+        </h2>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <div>
+            <%= form.label :code, "Mã khuyến mãi", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.text_field :code,
+                  placeholder: "Ví dụ: WELCOME10",
+                  required: true,
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm uppercase outline-none focus:border-[#B99A55]" %>
+            <p class="mt-1 text-xs text-gray-400">Mã sẽ tự động chuyển thành chữ in hoa.</p>
+          </div>
+
+          <div>
+            <%= form.label :description, "Mô tả chương trình", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.text_field :description,
+                  placeholder: "Ví dụ: Ưu đãi dành cho khách hàng mới",
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          </div>
+
+          <div>
+            <%= form.label :discount_type, "Hình thức giảm giá", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.select :discount_type,
+                  [["Giảm theo phần trăm (%)", "percentage"], ["Giảm số tiền cố định (VNĐ)", "fixed"]],
+                  {},
+                  class: "w-full border border-[#D8D0B8] bg-white px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          </div>
+
+          <div>
+            <%= form.label :discount_value, "Giá trị giảm", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.number_field :discount_value,
+                  min: 0.01,
+                  step: 0.01,
+                  required: true,
+                  placeholder: "Ví dụ: 10",
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          </div>
+        </div>
+      </section>
+
+      <section class="border border-[#D8D0B8] bg-white p-6 md:p-8">
+        <h2 class="mb-6 border-b border-[#E8E1D2] pb-4 font-semibold text-[#123D2B]">
+          ĐIỀU KIỆN ÁP DỤNG
+        </h2>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <div>
+            <%= form.label :minimum_order_value, "Giá trị đơn hàng tối thiểu (VNĐ)", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.number_field :minimum_order_value,
+                  min: 0,
+                  step: 1000,
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          </div>
+
+          <div>
+            <%= form.label :maximum_discount, "Mức giảm tối đa (VNĐ)", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.number_field :maximum_discount,
+                  min: 0.01,
+                  step: 1000,
+                  placeholder: "Để trống nếu không giới hạn",
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+            <p class="mt-1 text-xs text-gray-400">Chỉ áp dụng cho mã giảm theo phần trăm.</p>
+          </div>
+
+          <div>
+            <%= form.label :usage_limit, "Tổng lượt sử dụng", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.number_field :usage_limit,
+                  min: 1,
+                  step: 1,
+                  placeholder: "Để trống nếu không giới hạn",
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          </div>
+
+          <div>
+            <%= form.label :per_user_limit, "Lượt sử dụng tối đa mỗi khách", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.number_field :per_user_limit,
+                  min: 1,
+                  step: 1,
+                  placeholder: "Để trống nếu không giới hạn",
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+          </div>
+        </div>
+      </section>
+
+      <section class="border border-[#D8D0B8] bg-white p-6 md:p-8">
+        <h2 class="mb-6 border-b border-[#E8E1D2] pb-4 font-semibold text-[#123D2B]">
+          THỜI GIAN VÀ TRẠNG THÁI
+        </h2>
+
+        <div class="grid gap-5 md:grid-cols-2">
+          <div>
+            <%= form.label :starts_at, "Thời gian bắt đầu", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.datetime_field :starts_at,
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+            <p class="mt-1 text-xs text-gray-400">Để trống nếu có thể sử dụng ngay.</p>
+          </div>
+
+          <div>
+            <%= form.label :expires_at, "Thời gian kết thúc", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
+            <%= form.datetime_field :expires_at,
+                  class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
+            <p class="mt-1 text-xs text-gray-400">Để trống nếu không có ngày hết hạn.</p>
+          </div>
+        </div>
+
+        <div class="mt-6 border-t border-[#E8E1D2] pt-5">
+          <label class="flex cursor-pointer items-center gap-3">
+            <%= form.check_box :active,
+                  class: "h-4 w-4 accent-[#1B5B3A]" %>
+            <span class="text-sm font-medium text-[#123D2B]">
+              Kích hoạt mã khuyến mãi
+            </span>
+          </label>
+          <p class="ml-7 mt-1 text-xs text-gray-400">
+            Mã chỉ có thể sử dụng khi đang được kích hoạt và còn hiệu lực.
+          </p>
+        </div>
+      </section>
+
+      <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <%= link_to "HỦY",
+              admin_promotion_codes_path,
+              class: "border border-[#D8D0B8] px-7 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] transition hover:bg-white" %>
+
+        <%= form.submit(
+              promotion_code.persisted? ? "LƯU THAY ĐỔI" : "TẠO MÃ KHUYẾN MÃI",
+              class: "cursor-pointer bg-[#123D2B] px-7 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]"
+            ) %>
+      </div>
+
+    <% end %>
+  </div>
+</div>

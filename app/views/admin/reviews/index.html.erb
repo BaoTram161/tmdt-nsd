@@ -1,0 +1,196 @@
+<% content_for :title, "Quản lý đánh giá | BLACK GINSENG" %>
+
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:px-8">
+  <div class="mx-auto max-w-7xl">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="mb-8">
+      <p class="mb-2 text-xs font-semibold tracking-[0.25em] text-[#B99A55]">
+        BLACK GINSENG
+      </p>
+
+      <h1 class="text-3xl font-bold tracking-wide text-[#123D2B]">
+        QUẢN LÝ ĐÁNH GIÁ
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-600">
+        Theo dõi và quản lý những đánh giá sản phẩm từ khách hàng.
+      </p>
+    </div>
+
+    <!-- THỐNG KÊ -->
+    <div class="mb-6 grid gap-5 sm:grid-cols-2">
+      <div class="border border-[#D8D0B8] bg-white p-5 shadow-sm">
+        <p class="text-sm text-gray-500">Tổng số đánh giá</p>
+        <p class="mt-2 text-3xl font-bold tabular-nums text-[#123D2B]">
+          <%= @total_reviews %>
+        </p>
+      </div>
+
+      <div class="border border-[#D8D0B8] bg-white p-5 shadow-sm">
+        <p class="text-sm text-gray-500">Điểm đánh giá trung bình</p>
+        <p class="mt-2 text-3xl font-bold tabular-nums text-[#B99A55]">
+          <%= @average_rating || "—" %>
+          <% if @average_rating.present? %>
+            <span class="text-lg">/ 5 ★</span>
+          <% end %>
+        </p>
+      </div>
+    </div>
+
+    <!-- DANH SÁCH ĐÁNH GIÁ -->
+    <section class="overflow-hidden border border-[#D8D0B8] bg-white shadow-sm">
+
+      <div class="border-b border-[#D8D0B8] p-5">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <h2 class="font-semibold text-[#123D2B]">
+            DANH SÁCH ĐÁNH GIÁ
+          </h2>
+
+          <span class="text-xs text-gray-400">
+            <%= @filtered_reviews_count %> kết quả
+          </span>
+        </div>
+
+        <!-- TÌM KIẾM VÀ LỌC -->
+        <%= form_with url: admin_reviews_path,
+              method: :get,
+              class: "mt-4 flex flex-col gap-3 lg:flex-row" do |form| %>
+
+          <%= form.text_field :q,
+                value: params[:q],
+                placeholder: "Tìm khách hàng, email, sản phẩm hoặc nội dung...",
+                class: "min-w-0 flex-1 border border-[#D8D0B8] bg-[#FCFBF7] px-4 py-3 text-sm outline-none transition focus:border-[#123D2B] focus:ring-1 focus:ring-[#123D2B]" %>
+
+          <%= form.select :rating,
+                options_for_select(
+                  [
+                    ["Tất cả số sao", ""],
+                    ["5 sao", "5"],
+                    ["4 sao", "4"],
+                    ["3 sao", "3"],
+                    ["2 sao", "2"],
+                    ["1 sao", "1"]
+                  ],
+                  params[:rating]
+                ),
+                {},
+                class: "border border-[#D8D0B8] bg-[#FCFBF7] px-4 py-3 text-sm outline-none focus:border-[#123D2B]" %>
+
+          <%= form.submit "TÌM KIẾM",
+                class: "cursor-pointer bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+
+          <% if params[:q].present? || params[:rating].present? %>
+            <%= link_to "XÓA BỘ LỌC",
+                  admin_reviews_path,
+                  class: "border border-[#D8D0B8] px-5 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] transition hover:bg-[#F7F4EA]" %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if @reviews.any? %>
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[1050px] text-left text-sm">
+
+            <thead class="bg-[#F7F4EA] text-xs text-gray-600">
+              <tr>
+                <th class="px-5 py-4 font-semibold">KHÁCH HÀNG</th>
+                <th class="px-5 py-4 font-semibold">SẢN PHẨM</th>
+                <th class="px-5 py-4 text-center font-semibold">ĐÁNH GIÁ</th>
+                <th class="px-5 py-4 font-semibold">NỘI DUNG</th>
+                <th class="px-5 py-4 font-semibold">NGÀY ĐÁNH GIÁ</th>
+                <th class="px-5 py-4 text-center font-semibold">THAO TÁC</th>
+              </tr>
+            </thead>
+
+            <tbody class="divide-y divide-[#E8E1D2]">
+              <% @reviews.each do |review| %>
+                <tr class="transition-colors hover:bg-[#FCFBF7]">
+
+                  <td class="px-5 py-4">
+                    <p class="font-semibold text-[#123D2B]">
+                      <%= review.user.full_name.presence || "Chưa cập nhật" %>
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500">
+                      <%= review.user.email_address %>
+                    </p>
+                  </td>
+
+                  <td class="px-5 py-4">
+                    <%= link_to review.product.name,
+                          product_path(review.product),
+                          class: "font-medium text-[#123D2B] transition hover:text-[#B99A55]" %>
+                  </td>
+
+                  <td class="px-5 py-4 text-center">
+                    <span class="whitespace-nowrap font-semibold text-[#B99A55]">
+                      <%= "★" * review.rating %>
+                    </span>
+                    <span class="text-xs text-gray-500">
+                      (<%= review.rating %>/5)
+                    </span>
+                  </td>
+
+                  <td class="max-w-xs px-5 py-4 leading-6 text-gray-600">
+                    <%= truncate(review.content, length: 180) %>
+                  </td>
+
+                  <td class="whitespace-nowrap px-5 py-4 text-gray-600">
+                    <%= review.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+                  </td>
+
+                  <td class="px-5 py-4 text-center">
+                    <%= button_to "XÓA",
+                          admin_review_path(
+                            review,
+                            q: params[:q],
+                            rating: params[:rating]
+                          ),
+                          method: :delete,
+                          form: {
+                            data: {
+                              turbo_confirm: "Bạn có chắc chắn muốn xóa đánh giá này không?"
+                            }
+                          },
+                          class: "cursor-pointer border border-[#A83232] bg-white px-4 py-2.5 text-xs font-semibold tracking-wide text-[#A83232] transition hover:bg-[#A83232] hover:text-white" %>
+                  </td>
+
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+      <% else %>
+        <div class="px-5 py-14 text-center">
+          <p class="font-semibold text-[#123D2B]">
+            CHƯA CÓ ĐÁNH GIÁ PHÙ HỢP
+          </p>
+
+          <p class="mt-2 text-sm text-gray-500">
+            Đánh giá của khách hàng sẽ được hiển thị tại đây.
+          </p>
+
+          <% if params[:q].present? || params[:rating].present? %>
+            <%= link_to "XÓA BỘ LỌC",
+                  admin_reviews_path,
+                  class: "mt-5 inline-flex bg-[#123D2B] px-5 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+          <% end %>
+        </div>
+      <% end %>
+
+    </section>
+
+    <!-- QUAY LẠI -->
+    <div class="mt-8 border-t border-[#D8D0B8] pt-6">
+      <%= link_to "← QUAY LẠI TRANG QUẢN TRỊ",
+            admin_root_path,
+            class: "inline-flex items-center text-sm font-semibold tracking-wider text-[#1B5B3A] transition hover:text-[#B99A55]" %>
+    </div>
+
+    <div class="mt-8 border-t border-[#D8D0B8] pt-5 text-center text-xs text-gray-500">
+      BLACK GINSENG · HỆ THỐNG QUẢN TRỊ CỬA HÀNG
+    </div>
+
+  </div>
+</div>
