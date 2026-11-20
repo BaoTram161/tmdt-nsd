@@ -30,4 +30,42 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
     assert_empty cookies[:session_id]
   end
+
+  test "đăng nhập với email không phân biệt chữ hoa thường" do
+    post session_path, params: {
+      email_address: @user.email_address.upcase,
+      password: "password"
+    }
+
+    assert_redirected_to root_path
+    assert cookies[:session_id]
+  end
+
+  test "không đăng nhập khi thiếu email hoặc mật khẩu" do
+    post session_path, params: {
+      email_address: "",
+      password: "password"
+    }
+
+    assert_redirected_to new_session_path
+    assert_nil cookies[:session_id]
+
+    post session_path, params: {
+      email_address: @user.email_address,
+      password: ""
+    }
+
+    assert_redirected_to new_session_path
+    assert_nil cookies[:session_id]
+  end
+
+  test "đăng xuất trả về trạng thái see other" do
+    sign_in_as(@user)
+
+    delete session_path
+
+    assert_response :see_other
+    assert_redirected_to new_session_path
+    assert_empty cookies[:session_id]
+  end
 end

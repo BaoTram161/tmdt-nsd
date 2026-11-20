@@ -64,4 +64,30 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     def assert_notice(text)
       assert_select "div", /#{text}/
     end
+
+  test "đặt lại mật khẩu sẽ xóa các phiên đăng nhập cũ" do
+    sign_in_as(@user)
+    token = @user.password_reset_token
+
+    assert_difference -> { @user.sessions.count }, -1 do
+      put password_path(token), params: {
+        password: "newpassword123",
+        password_confirmation: "newpassword123"
+      }
+    end
+
+    assert_redirected_to new_session_path
+  end
+
+  test "không thể cập nhật mật khẩu bằng token không hợp lệ" do
+    old_digest = @user.password_digest
+
+    put password_path("invalid token"), params: {
+      password: "newpassword123",
+      password_confirmation: "newpassword123"
+    }
+
+    assert_redirected_to new_password_path
+    assert_equal old_digest, @user.reload.password_digest
+  end
 end

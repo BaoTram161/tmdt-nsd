@@ -1,0 +1,19 @@
+<aside class="h-fit border border-[#D8D0B8] bg-white p-5">
+  <h2 class="font-serif text-lg font-bold text-[#123D2B]">
+    QUẢN LÝ TÀI KHOẢN
+  </h2>
+
+  <div class="mt-5 space-y-1">
+    <%= link_to "Thông tin cá nhân", profile_path,
+          class: "block px-4 py-3 text-sm transition hover:bg-[#F7F4EA] hover:text-[#123D2B] #{active == 'profile' ? 'bg-[#F7F4EA] font-semibold text-[#123D2B]' : 'text-gray-600'}" %>
+
+    <%= link_to "Địa chỉ giao hàng", addresses_path,
+          class: "block px-4 py-3 text-sm transition hover:bg-[#F7F4EA] hover:text-[#123D2B] #{active == 'addresses' ? 'bg-[#F7F4EA] font-semibold text-[#123D2B]' : 'text-gray-600'}" %>
+
+    <%= link_to "Đơn hàng đã mua", orders_path,
+          class: "block px-4 py-3 text-sm transition hover:bg-[#F7F4EA] hover:text-[#123D2B] #{active == 'orders' ? 'bg-[#F7F4EA] font-semibold text-[#123D2B]' : 'text-gray-600'}" %>
+
+    <%= link_to "Đánh giá của tôi", reviews_path,
+          class: "block px-4 py-3 text-sm transition hover:bg-[#F7F4EA] hover:text-[#123D2B] #{active == 'reviews' ? 'bg-[#F7F4EA] font-semibold text-[#123D2B]' : 'text-gray-600'}" %>
+  </div>
+</aside>

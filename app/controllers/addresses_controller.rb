@@ -12,7 +12,7 @@ class AddressesController < ApplicationController
 
   def create
     @address = Current.user.addresses.new(address_params)
-    @address.is_default = true if Current.user.addresses.none?
+    @address.is_default = true unless Current.user.addresses.exists?
 
     if @address.save
       redirect_to addresses_path, notice: "Đã thêm địa chỉ giao hàng."
