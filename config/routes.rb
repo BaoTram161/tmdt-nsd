@@ -1,14 +1,17 @@
 Rails.application.routes.draw do
   # Tài khoản
   resource :registration, only: %i[new create]
-  resource :session
-  resources :passwords, param: :token
+  resource :session, only: %i[new create destroy]
+  resources :passwords, only: %i[new create edit update], param: :token
 
   resource :profile, only: %i[show update], controller: "profiles"
   resources :addresses, only: %i[index new create edit update destroy]
 
   # Đơn hàng của khách hàng
   resources :orders, only: %i[index show]
+
+  # Đánh giá của khách hàng
+  resources :reviews, only: :index
 
   # Quản trị Admin
   namespace :admin do
@@ -24,6 +27,14 @@ Rails.application.routes.draw do
 
     # Quản lý khách hàng
     resources :customers, only: %i[index show]
+
+    # Quản lý đánh giá
+    resources :reviews, only: %i[index destroy]
+
+    # Quản lý khuyến mãi
+    resources :promotion_codes, only: %i[index new create edit update] do
+      patch :toggle_active, on: :member
+    end
   end
 
   root "home#index"
@@ -31,7 +42,9 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Sản phẩm của khách hàng
-  resources :products, only: %i[index show]
+  resources :products, only: %i[index show] do
+    resources :reviews, only: %i[create update destroy]
+  end
 
   # Giỏ hàng
   resource :cart, only: :show
@@ -47,6 +60,15 @@ Rails.application.routes.draw do
   delete "cart/items/:product_id",
          to: "carts#remove",
          as: :remove_cart_item
+
+  # Mã khuyến mãi trong giỏ hàng
+  post "cart/promotion",
+       to: "carts#apply_promotion",
+       as: :apply_cart_promotion
+
+  delete "cart/promotion",
+         to: "carts#remove_promotion",
+         as: :remove_cart_promotion
 
   # Thanh toán
   resource :checkout, only: %i[show create]
