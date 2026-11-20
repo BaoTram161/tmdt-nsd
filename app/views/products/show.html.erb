@@ -1,4 +1,3 @@
-
 <% content_for :title, "#{@product.name} | BLACK GINSENG" %>
 
 <%
@@ -278,6 +277,210 @@
       </div>
 
     </div>
+  </div>
+</section>
+
+<!-- ĐÁNH GIÁ SẢN PHẨM -->
+<section id="reviews" class="bg-[#F7F4EA] border-y border-[#E5DFCF]">
+  <div class="max-w-7xl mx-auto px-4 py-10 md:py-12">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="mb-8">
+      <p class="text-xs tracking-[0.22em] font-semibold text-[#A8873D]">
+        CHIA SẺ TRẢI NGHIỆM
+      </p>
+
+      <h2 class="inline-block mt-2 pb-3 border-b-2 border-[#A8873D] text-xl md:text-2xl font-serif font-bold text-[#123D2B]">
+        ĐÁNH GIÁ SẢN PHẨM
+      </h2>
+    </div>
+
+    <!-- TỔNG QUAN ĐÁNH GIÁ -->
+    <div class="bg-white border border-[#E5DFCF] p-6 mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+
+        <div>
+          <p class="text-sm text-gray-500">Điểm đánh giá trung bình</p>
+
+          <% if @average_rating.present? %>
+            <p class="mt-1 text-3xl font-bold text-[#123D2B]">
+              <%= number_with_precision(@average_rating, precision: 1) %>
+              <span class="text-lg text-[#A8873D]">/ 5</span>
+            </p>
+
+            <p class="mt-1 text-xl tracking-wider text-[#C49A3A]">
+              <%= "★" * @average_rating.round %><%= "☆" * (5 - @average_rating.round) %>
+            </p>
+          <% else %>
+            <p class="mt-1 text-lg font-semibold text-gray-500">
+              Chưa có đánh giá
+            </p>
+          <% end %>
+        </div>
+
+        <div class="sm:ml-8 sm:border-l sm:border-[#E5DFCF] sm:pl-8">
+          <p class="text-3xl font-bold text-[#123D2B]">
+            <%= @review_count %>
+          </p>
+          <p class="mt-1 text-sm text-gray-500">
+            lượt đánh giá
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FORM VIẾT HOẶC CHỈNH SỬA ĐÁNH GIÁ -->
+    <% if @my_review.present? || @can_review %>
+      <div class="bg-white border border-[#E5DFCF] p-6 mb-8">
+
+        <h3 class="text-base font-semibold text-[#123D2B]">
+          <%= @my_review.present? ? "Chỉnh sửa đánh giá của bạn" : "Viết đánh giá của bạn" %>
+        </h3>
+
+        <p class="mt-1 text-sm text-gray-500">
+          Hãy chia sẻ cảm nhận của bạn về sản phẩm.
+        </p>
+
+        <%= form_with model: [@product, @my_review || Review.new],
+                      class: "mt-5 space-y-4" do |f| %>
+
+          <!-- CHỌN SỐ SAO -->
+          <div>
+            <%= f.label :rating, "Mức độ hài lòng",
+                  class: "block text-sm font-medium text-[#123D2B] mb-3" %>
+
+            <div class="flex flex-row-reverse justify-end items-center gap-2">
+              <% (1..5).to_a.reverse.each do |number| %>
+                <%= f.radio_button :rating, number,
+                      id: "review_rating_#{number}",
+                      checked: (@my_review&.rating == number),
+                      class: "peer sr-only" %>
+
+                <%= label_tag "review_rating_#{number}", "★",
+                      class: "cursor-pointer text-3xl text-gray-300 transition-colors duration-150 hover:text-[#C49A3A] peer-checked:text-[#C49A3A] peer-checked ~ label:text-[#C49A3A]",
+                      title: "#{number} sao" %>
+              <% end %>
+            </div>
+
+            <p class="mt-2 text-xs text-gray-400">
+              Nhấn vào số sao tương ứng với mức độ hài lòng của bạn.
+            </p>
+          </div>
+
+          <!-- NỘI DUNG ĐÁNH GIÁ -->
+          <div>
+            <%= f.label :content, "Nội dung đánh giá", class: "block text-sm font-medium text-[#123D2B] mb-2" %>
+
+            <%= f.text_area :content,
+                  rows: 4,
+                  maxlength: 2000,
+                  placeholder: "Chia sẻ trải nghiệm của bạn về sản phẩm...",
+                  class: "w-full rounded-md border border-[#D8D0B8] px-3 py-3 text-sm focus:border-[#A8873D] focus:ring-[#A8873D]",
+                  required: true %>
+
+            <p class="mt-1 text-xs text-gray-400">
+              Tối đa 2.000 ký tự.
+            </p>
+          </div>
+
+          <div>
+            <%= f.submit @my_review.present? ? "CẬP NHẬT ĐÁNH GIÁ" : "GỬI ĐÁNH GIÁ",
+                  class: "inline-flex items-center justify-center px-6 py-3 bg-[#123D2B] text-white text-xs font-semibold tracking-wide hover:bg-[#1B5B3A] transition cursor-pointer" %>
+          </div>
+
+        <% end %>
+      </div>
+
+    <% elsif authenticated? %>
+
+      <div class="bg-white border border-[#E5DFCF] p-5 mb-8">
+        <p class="text-sm text-gray-600">
+          Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng chứa sản phẩm này đã được giao thành công.
+        </p>
+      </div>
+
+    <% else %>
+
+      <div class="bg-white border border-[#E5DFCF] p-5 mb-8">
+        <p class="text-sm text-gray-600">
+          Vui lòng
+          <%= link_to "đăng nhập", new_session_path, class: "font-semibold text-[#A8873D] hover:underline" %>
+          để tham gia đánh giá sản phẩm.
+        </p>
+      </div>
+
+    <% end %>
+
+    <!-- DANH SÁCH ĐÁNH GIÁ -->
+    <div>
+      <h3 class="text-base font-semibold text-[#123D2B] mb-5">
+        Nhận xét từ khách hàng
+      </h3>
+
+      <% if @reviews.any? %>
+
+        <div class="space-y-4">
+          <% @reviews.each do |review| %>
+
+            <article class="bg-white border border-[#E5DFCF] p-5">
+
+              <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+
+                <div>
+                  <p class="text-sm font-semibold text-[#123D2B]">
+                    <%= review.user.full_name.presence || "Khách hàng" %>
+                  </p>
+
+                  <p class="mt-1 text-xs text-gray-400">
+                    <%= review.created_at.strftime("%d/%m/%Y") %>
+                  </p>
+
+                  <p class="mt-2 text-lg tracking-wider text-[#C49A3A]">
+                    <%= "★" * review.rating %><%= "☆" * (5 - review.rating) %>
+                  </p>
+                </div>
+
+                <% if Current.user&.id == review.user_id %>
+                  <%= button_to "XÓA ĐÁNH GIÁ",
+                        product_review_path(@product, review),
+                        method: :delete,
+                        form: {
+                          data: {
+                            turbo_confirm: "Bạn có chắc chắn muốn xóa đánh giá này?"
+                          }
+                        },
+                        class: "text-xs font-semibold text-red-600 hover:text-red-800 cursor-pointer" %>
+                <% end %>
+
+              </div>
+
+              <p class="mt-3 text-sm leading-7 text-gray-600 whitespace-pre-line">
+                <%= review.content %>
+              </p>
+
+              <% if Current.user&.id == review.user_id %>
+                <p class="mt-3 text-xs text-[#A8873D]">
+                  Đây là đánh giá của bạn. Bạn có thể chỉnh sửa nội dung ở biểu mẫu phía trên.
+                </p>
+              <% end %>
+
+            </article>
+
+          <% end %>
+        </div>
+
+      <% else %>
+
+        <div class="bg-white border border-[#E5DFCF] p-8 text-center">
+          <p class="text-sm text-gray-500">
+            Sản phẩm chưa có đánh giá nào. Hãy là người đầu tiên chia sẻ trải nghiệm!
+          </p>
+        </div>
+
+      <% end %>
+    </div>
+
   </div>
 </section>
 

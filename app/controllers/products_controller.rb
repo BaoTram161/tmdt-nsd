@@ -1,5 +1,6 @@
 class ProductsController < ApplicationController
   allow_unauthenticated_access
+  before_action :resume_session, only: :show
 
   def index
     @categories = Category.roots.includes(:children).order(:id)
@@ -12,6 +13,29 @@ class ProductsController < ApplicationController
 
   def show
     @product = Product.available.includes(:category).find(params[:id])
+
+    # Danh sách đánh giá của sản phẩm
+    @reviews = @product.reviews.includes(:user).order(created_at: :desc)
+
+    # Điểm trung bình và số lượt đánh giá
+    @average_rating = @product.reviews.average(:rating)&.round(1)
+    @review_count = @product.reviews.count
+
+    # Đánh giá của khách hàng đang đăng nhập
+    @my_review = Current.user&.reviews&.find_by(product_id: @product.id)
+
+    # Kiểm tra khách hàng có đơn hàng đã giao chứa sản phẩm này
+    @can_review = false
+
+    if Current.user
+      @can_review = Current.user.orders
+                            .joins(:order_items)
+                            .where(
+                              status: :delivered,
+                              order_items: { product_id: @product.id }
+                            )
+                            .exists?
+    end
   end
 
   private

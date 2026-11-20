@@ -1,0 +1,108 @@
+<% content_for :title, "Đánh giá của tôi | BLACK GINSENG" %>
+
+<div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:py-14">
+  <div class="mx-auto max-w-7xl">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-[280px_minmax(0,1fr)]">
+
+      <%= render "shared/account_sidebar", active: "reviews" %>
+
+      <main class="min-w-0">
+        <div class="mb-8">
+          <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#B99A55]">
+            BLACK GINSENG
+          </p>
+
+          <h1 class="text-2xl font-semibold tracking-wide text-[#123D2B] md:text-3xl">
+            ĐÁNH GIÁ CỦA TÔI
+          </h1>
+
+          <p class="mt-2 text-sm text-gray-500">
+            Quản lý các đánh giá sản phẩm bạn đã gửi.
+          </p>
+        </div>
+
+        <% if @reviews.any? %>
+          <div class="space-y-5">
+            <% @reviews.each do |review| %>
+              <div class="border border-[#D8D0B8] bg-white p-5 shadow-sm">
+
+                <div class="flex flex-col gap-4 sm:flex-row">
+                  <div class="flex h-24 w-24 shrink-0 items-center justify-center border border-[#D8D0B8] bg-[#F7F4EA]">
+                    <% if review.product.image_url.present? %>
+                      <%= image_tag review.product.image_url,
+                          class: "h-full w-full object-contain",
+                          alt: review.product.name %>
+                    <% else %>
+                      <span class="text-xs text-gray-400">BLACK GINSENG</span>
+                    <% end %>
+                  </div>
+
+                  <div class="min-w-0 flex-1">
+                    <h2 class="font-semibold text-[#123D2B]">
+                      <%= review.product.name %>
+                    </h2>
+
+                    <div class="mt-2 flex items-center gap-1 text-[#B99A55]">
+                      <% 5.times do |i| %>
+                        <span><%= i < review.rating ? "★" : "☆" %></span>
+                      <% end %>
+
+                      <span class="ml-2 text-xs text-gray-500">
+                        <%= review.rating %>/5 sao
+                      </span>
+                    </div>
+
+                    <p class="mt-2 text-xs text-gray-400">
+                      Ngày đánh giá:
+                      <%= review.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-5 border-t border-[#E8E2D5] pt-4">
+                  <p class="text-xs font-semibold tracking-wide text-[#123D2B]">
+                    NỘI DUNG ĐÁNH GIÁ
+                  </p>
+
+                  <p class="mt-2 whitespace-pre-line text-sm leading-7 text-gray-600">
+                    <%= review.content %>
+                  </p>
+                </div>
+
+                <div class="mt-5 flex flex-wrap gap-3">
+                  <%= link_to "XEM SẢN PHẨM",
+                      product_path(review.product),
+                      class: "border border-[#123D2B] px-5 py-2.5 text-xs font-semibold text-[#123D2B] transition hover:bg-[#123D2B] hover:text-white" %>
+
+                  <%= link_to "CHỈNH SỬA ĐÁNH GIÁ",
+                      product_path(review.product, anchor: "reviews"),
+                      class: "border border-[#D8D0B8] px-5 py-2.5 text-xs font-semibold text-gray-600 transition hover:border-[#B99A55] hover:text-[#123D2B]" %>
+                </div>
+
+              </div>
+            <% end %>
+          </div>
+
+        <% else %>
+          <div class="border border-[#D8D0B8] bg-white px-5 py-16 text-center">
+            <div class="mb-5 text-4xl text-[#B99A55]">☆</div>
+
+            <h2 class="text-lg font-semibold text-[#123D2B]">
+              BẠN CHƯA CÓ ĐÁNH GIÁ
+            </h2>
+
+            <p class="mt-2 text-sm text-gray-500">
+              Những đánh giá bạn gửi sẽ được hiển thị tại đây.
+            </p>
+
+            <%= link_to "KHÁM PHÁ SẢN PHẨM",
+                products_path,
+                class: "mt-6 inline-flex bg-[#123D2B] px-7 py-3 text-xs font-semibold tracking-wider text-white transition hover:bg-[#1B5B3A]" %>
+          </div>
+        <% end %>
+
+      </main>
+
+    </div>
+  </div>
+</div>
