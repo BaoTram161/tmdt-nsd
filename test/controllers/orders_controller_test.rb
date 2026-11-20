@@ -37,6 +37,29 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
     assert_response :not_found
   end
 
+  # DANH SÁCH ĐƠN HÀNG
+
+  test "hiển thị danh sách trống khi chưa có đơn hàng" do
+    get orders_url
+
+    assert_response :success
+  end
+
+  test "sắp xếp đơn hàng mới nhất lên trước" do
+    older_order = create_order_for(@user)
+    newer_order = create_order_for(@user)
+
+    older_order.update!(created_at: 2.days.ago)
+    newer_order.update!(created_at: 1.day.ago)
+
+    get orders_url
+
+    assert_response :success
+    assert_operator response.body.index(newer_order.order_number),
+                    :<,
+                    response.body.index(older_order.order_number)
+  end
+
   private
 
   def create_order_for(user)

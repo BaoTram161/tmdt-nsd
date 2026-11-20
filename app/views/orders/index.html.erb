@@ -1,115 +1,124 @@
 <% content_for :title, "Đơn hàng của tôi | BLACK GINSENG" %>
 
 <div class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:py-14">
-  <div class="mx-auto max-w-6xl">
+  <div class="mx-auto max-w-7xl">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-[280px_minmax(0,1fr)]">
 
-    <div class="mb-8">
-      <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#B99A55]">
-        BLACK GINSENG
-      </p>
+      <%= render "shared/account_sidebar", active: "orders" %>
 
-      <h1 class="text-2xl font-semibold tracking-wide text-[#123D2B] md:text-3xl">
-        ĐƠN HÀNG CỦA TÔI
-      </h1>
+      <main class="min-w-0">
+        <div class="mb-8">
+          <p class="mb-2 text-xs font-semibold tracking-[0.2em] text-[#B99A55]">
+            BLACK GINSENG
+          </p>
 
-      <p class="mt-2 text-sm text-gray-500">
-        Theo dõi và quản lý các đơn hàng bạn đã đặt.
-      </p>
-    </div>
+          <h1 class="text-2xl font-semibold tracking-wide text-[#123D2B] md:text-3xl">
+            ĐƠN HÀNG CỦA TÔI
+          </h1>
 
-    <% if @orders.any? %>
-      <div class="space-y-5">
-        <% @orders.each do |order| %>
-          <div class="border border-[#D8D0B8] bg-white shadow-sm">
+          <p class="mt-2 text-sm text-gray-500">
+            Theo dõi và quản lý các đơn hàng bạn đã đặt.
+          </p>
+        </div>
 
-            <div class="flex flex-col gap-3 border-b border-[#D8D0B8] bg-[#FCFBF7] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p class="text-xs text-gray-500">MÃ ĐƠN HÀNG</p>
-                <p class="mt-1 font-semibold text-[#123D2B]">
-                  <%= order.order_number %>
-                </p>
-              </div>
+        <% if @orders.any? %>
+          <div class="space-y-5">
+            <% @orders.each do |order| %>
+              <div class="border border-[#D8D0B8] bg-white shadow-sm">
 
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="text-xs text-gray-500">
-                  <%= order.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
-                </span>
-
-                <span class="border border-[#D8D0B8] bg-white px-3 py-1.5 text-xs font-medium text-[#8B6D2F]">
-                  <%= order_status_label(order.status) %>
-                </span>
-              </div>
-            </div>
-
-            <div class="space-y-4 px-5 py-5">
-              <% order.order_items.each do |item| %>
-                <div class="flex items-center gap-4">
-                  <% if item.product_image.present? %>
-                    <%= image_tag item.product_image,
-                        class: "h-16 w-16 shrink-0 border border-[#D8D0B8] object-cover",
-                        alt: item.product_name %>
-                  <% else %>
-                    <div class="flex h-16 w-16 shrink-0 items-center justify-center border border-[#D8D0B8] bg-[#F7F4EA] text-[10px] text-gray-400">
-                      BLACK GINSENG
-                    </div>
-                  <% end %>
-
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-medium text-[#123D2B]">
-                      <%= item.product_name %>
-                    </p>
-                    <p class="mt-1 text-xs text-gray-500">
-                      Số lượng: <%= item.quantity %>
+                <div class="flex flex-col gap-3 border-b border-[#D8D0B8] bg-[#FCFBF7] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-xs text-gray-500">MÃ ĐƠN HÀNG</p>
+                    <p class="mt-1 font-semibold text-[#123D2B]">
+                      <%= order.order_number %>
                     </p>
                   </div>
 
-                  <p class="shrink-0 text-sm font-semibold text-[#A83232]">
-                    <%= format_vnd(item.total_price) %>
-                  </p>
+                  <div class="flex flex-wrap items-center gap-3">
+                    <span class="text-xs text-gray-500">
+                      <%= order.created_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%d/%m/%Y %H:%M") %>
+                    </span>
+
+                    <span class="border border-[#D8D0B8] bg-white px-3 py-1.5 text-xs font-medium text-[#8B6D2F]">
+                      <%= order_status_label(order.status) %>
+                    </span>
+                  </div>
                 </div>
-              <% end %>
-            </div>
 
-            <div class="flex flex-col gap-4 border-t border-[#D8D0B8] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p class="text-xs text-gray-500">TỔNG THANH TOÁN</p>
-                <p class="mt-1 text-lg font-semibold text-[#A83232]">
-                  <%= format_vnd(order.total) %>
-                </p>
+                <div class="space-y-4 px-5 py-5">
+                  <% order.order_items.each do |item| %>
+                    <div class="flex items-center gap-4">
+                      <% if item.product_image.present? %>
+                        <%= image_tag item.product_image,
+                            class: "h-16 w-16 shrink-0 border border-[#D8D0B8] object-cover",
+                            alt: item.product_name %>
+                      <% else %>
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center border border-[#D8D0B8] bg-[#F7F4EA] text-[10px] text-gray-400">
+                          BLACK GINSENG
+                        </div>
+                      <% end %>
+
+                      <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-[#123D2B]">
+                          <%= item.product_name %>
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                          Số lượng: <%= item.quantity %>
+                        </p>
+                      </div>
+
+                      <p class="shrink-0 text-sm font-semibold text-[#A83232]">
+                        <%= format_vnd(item.total_price) %>
+                      </p>
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="flex flex-col gap-4 border-t border-[#D8D0B8] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-xs text-gray-500">TỔNG THANH TOÁN</p>
+                    <p class="mt-1 text-lg font-semibold text-[#A83232]">
+                      <%= format_vnd(order.total) %>
+                    </p>
+                  </div>
+
+                  <div class="flex flex-wrap items-center gap-3">
+                    <%= link_to "XEM CHI TIẾT",
+                        order_path(order),
+                        class: "inline-flex items-center justify-center border border-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wider text-[#123D2B] transition hover:bg-[#123D2B] hover:text-white" %>
+
+                    <% if order.status == "delivered" && order.order_items.any? %>
+                      <%= link_to "ĐÁNH GIÁ",
+                          product_path(order.order_items.first.product_id, anchor: "reviews"),
+                          class: "inline-flex items-center justify-center bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wider text-white transition hover:bg-[#1B5B3A]" %>
+                    <% end %>
+                  </div>
+                </div>
+
               </div>
+            <% end %>
+          </div>
 
-              <%= link_to "XEM CHI TIẾT",
-                  order_path(order),
-                  class: "inline-flex items-center justify-center border border-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wider text-[#123D2B] transition hover:bg-[#123D2B] hover:text-white" %>
-            </div>
+        <% else %>
+          <div class="border border-[#D8D0B8] bg-white px-5 py-16 text-center">
+            <div class="mb-5 text-4xl text-[#B99A55]">□</div>
 
+            <h2 class="text-lg font-semibold text-[#123D2B]">
+              BẠN CHƯA CÓ ĐƠN HÀNG
+            </h2>
+
+            <p class="mt-2 text-sm text-gray-500">
+              Các đơn hàng bạn đặt sẽ được hiển thị tại đây.
+            </p>
+
+            <%= link_to "KHÁM PHÁ SẢN PHẨM",
+                products_path,
+                class: "mt-6 inline-flex bg-[#123D2B] px-7 py-3 text-xs font-semibold tracking-wider text-white transition hover:bg-[#1B5B3A]" %>
           </div>
         <% end %>
-      </div>
 
-    <% else %>
-      <div class="border border-[#D8D0B8] bg-white px-5 py-16 text-center">
-        <div class="mb-5 text-4xl text-[#B99A55]">□</div>
+      </main>
 
-        <h2 class="text-lg font-semibold text-[#123D2B]">
-          BẠN CHƯA CÓ ĐƠN HÀNG
-        </h2>
-
-        <p class="mt-2 text-sm text-gray-500">
-          Các đơn hàng bạn đặt sẽ được hiển thị tại đây.
-        </p>
-
-        <%= link_to "KHÁM PHÁ SẢN PHẨM",
-            products_path,
-            class: "mt-6 inline-flex bg-[#123D2B] px-7 py-3 text-xs font-semibold tracking-wider text-white transition hover:bg-[#1B5B3A]" %>
-      </div>
-    <% end %>
-
-    <div class="mt-8">
-      <%= link_to "← TRỞ VỀ TRANG CHỦ",
-          root_path,
-          class: "text-xs font-semibold tracking-wide text-[#123D2B] hover:text-[#B99A55]" %>
     </div>
-
   </div>
 </div>

@@ -42,7 +42,33 @@ class CheckoutsController < ApplicationController
 
     @subtotal = calculate_subtotal(@cart_items)
     @shipping_fee = SHIPPING_FEE
-    @total = @subtotal + @shipping_fee
+
+    @discount_amount = 0.to_d
+    @promotion_code = nil
+
+    if session[:promotion_code].present?
+      promotion = PromotionCode.find_by(code: session[:promotion_code])
+
+      error = if promotion.nil?
+        "Mã khuyến mãi không còn tồn tại."
+      else
+        promotion.eligibility_error(
+          user: Current.user,
+          subtotal: @subtotal
+        )
+      end
+
+      if error.present?
+        session.delete(:promotion_code)
+
+        return redirect_to cart_path, alert: error
+      end
+
+      @promotion_code = promotion
+      @discount_amount = promotion.calculate_discount(@subtotal)
+    end
+
+    @total = @subtotal - @discount_amount + @shipping_fee
   rescue CheckoutError => e
     redirect_to cart_path, alert: e.message
   end
@@ -85,6 +111,28 @@ class CheckoutsController < ApplicationController
 
       subtotal = calculate_subtotal(cart_items)
 
+      promotion = nil
+      discount_amount = 0.to_d
+
+      if session[:promotion_code].present?
+        promotion = PromotionCode.lock.find_by(
+          code: session[:promotion_code]
+        )
+
+        unless promotion
+          raise CheckoutError, "Mã khuyến mãi không còn tồn tại."
+        end
+
+        error = promotion.eligibility_error(
+          user: Current.user,
+          subtotal: subtotal
+        )
+
+        raise CheckoutError, error if error.present?
+
+        discount_amount = promotion.calculate_discount(subtotal)
+      end
+
       @order = Current.user.orders.create!(
         recipient_name: address.recipient_name,
         phone: address.phone,
@@ -93,7 +141,9 @@ class CheckoutsController < ApplicationController
         street_address: address.street_address,
         subtotal: subtotal,
         shipping_fee: SHIPPING_FEE,
-        total: subtotal + SHIPPING_FEE,
+        promotion_code: promotion&.code,
+        discount_amount: discount_amount,
+        total: subtotal - discount_amount + SHIPPING_FEE,
         payment_method: :cod,
         payment_status: :unpaid,
         status: :pending,
@@ -117,9 +167,12 @@ class CheckoutsController < ApplicationController
           sold_count: product.sold_count + quantity
         )
       end
+
+      promotion.increment!(:used_count) if promotion
     end
 
     session.delete(:cart)
+    session.delete(:promotion_code)
 
     render :create, status: :created
   rescue CheckoutError => e

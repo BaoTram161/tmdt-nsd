@@ -170,6 +170,17 @@
             </strong>
           </div>
 
+          <% if @promotion_code.present? && @discount_amount.to_d.positive? %>
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-600">
+                Mã khuyến mãi (<%= @promotion_code.code %>)
+              </span>
+              <strong class="text-red-600">
+                -<%= format_vnd(@discount_amount) %>
+              </strong>
+            </div>
+          <% end %>
+
           <div class="flex justify-between gap-3">
             <span class="text-gray-600">Phí vận chuyển</span>
             <strong class="text-[#123D2B]">
