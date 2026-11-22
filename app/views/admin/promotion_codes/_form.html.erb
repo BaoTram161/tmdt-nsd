@@ -87,7 +87,7 @@
           <div>
             <%= form.label :maximum_discount, "Mức giảm tối đa (VNĐ)", class: "mb-2 block text-sm font-medium text-[#123D2B]" %>
             <%= form.number_field :maximum_discount,
-                  min: 0.01,
+                  min: 0,
                   step: 1000,
                   placeholder: "Để trống nếu không giới hạn",
                   class: "w-full border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#B99A55]" %>
