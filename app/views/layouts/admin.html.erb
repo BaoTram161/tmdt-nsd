@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title><%= content_for(:title) || "Quản trị | BLACK GINSENG" %></title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="m-0 min-h-screen bg-[#F7F4EA] text-gray-800">
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 bg-[#E8DFC9]">
+      <div class="flex w-full flex-col gap-3 px-4 py-3 lg:h-[120px] lg:flex-row lg:items-center lg:gap-6 lg:px-5">
+
+        <%= link_to admin_root_path, class: "flex shrink-0 items-center gap-3" do %>
+          <%= image_tag "black-ginseng-emblem.png",
+                alt: "Biểu tượng nhân sâm đen",
+                class: "h-[75px] w-[78px] shrink-0 object-contain md:h-[94px] md:w-[98px]" %>
+
+          <div class="flex flex-col items-center">
+            <span class="whitespace-nowrap font-serif text-xl font-bold leading-tight tracking-[0.065em] text-[#123D2B] md:text-[29px]">
+              BLACK GINSENG
+            </span>
+
+            <span class="mt-2 whitespace-nowrap text-[9px] font-medium tracking-[0.14em] text-[#987638] md:mt-3 md:text-[10px]">
+              TỪ MAGASAM WISCONSIN - HOA KỲ
+            </span>
+          </div>
+        <% end %>
+
+        <div class="min-w-0 flex-1 text-center lg:ml-64 lg:px-4 lg:text-left">
+          <div class="w-fit">
+            <h1 class="w-full text-center text-xl font-bold tracking-wide text-[#40566B] md:text-2xl">
+              TRANG QUẢN TRỊ
+            </h1>
+
+            <p class="mt-1 text-sm font-medium text-[#626B73] md:text-base">
+              Quản lý hoạt động cửa hàng BLACK GINSENG
+            </p>
+          </div>
+        </div>
+
+        <div class="flex shrink-0 items-center justify-between gap-3 lg:ml-auto">
+
+          <%= link_to root_path,
+                class: "hidden items-center gap-2 rounded-md bg-[#123D2B] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1B5B3A] sm:inline-flex" do %>
+            <span>Xem cửa hàng</span>
+            <span class="inline-flex items-center text-base leading-none" aria-hidden="true">↗︎</span>
+          <% end %>
+
+          <!-- MENU MOBILE -->
+          <div class="lg:hidden">
+            <details class="relative">
+              <summary class="cursor-pointer list-none rounded-md border border-[#D2C5A8] px-3 py-2 text-sm font-semibold text-[#123D2B] transition hover:bg-[#DED3BA]">
+                ☰ Menu
+              </summary>
+
+              <div class="fixed inset-y-0 left-0 z-50 w-64 shadow-xl">
+                <%= render "layouts/admin_sidebar" %>
+              </div>
+            </details>
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- SIDEBAR DESKTOP: CỐ ĐỊNH BÊN TRÁI -->
+    <aside
+      class="fixed left-0 top-[120px] z-30 hidden h-[calc(100vh-120px)] w-64 bg-[#123D2B] lg:block"
+    >
+      <%= render "layouts/admin_sidebar" %>
+    </aside>
+
+    <!-- MAIN CONTENT: NỘI DUNG BÊN PHẢI -->
+    <div class="min-h-screen min-w-0 lg:ml-64">
+
+      <!-- FLASH MESSAGES -->
+      <% flash.each do |type, message| %>
+        <div class="mx-4 mt-4 lg:mx-8">
+          <p class="rounded-md px-4 py-3 text-sm <%= type == 'alert' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' %>">
+            <%= message %>
+          </p>
+        </div>
+      <% end %>
+
+      <!-- PAGE CONTENT -->
+      <main class="min-w-0">
+        <%= yield %>
+      </main>
+
+    </div>
+
+  </body>
+</html>

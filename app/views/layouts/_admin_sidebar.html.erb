@@ -1,0 +1,74 @@
+<div class="flex h-full flex-col bg-[#123D2B] text-white">
+
+  <!-- MENU ĐIỀU HƯỚNG -->
+  <nav class="flex-1 space-y-2 overflow-hidden px-4 py-6">
+
+    <p class="mb-3 px-3 text-xs font-bold tracking-[0.16em] text-[#D6CBAA]/80">
+      TỔNG QUAN
+    </p>
+
+    <%= link_to admin_root_path,
+          class: "flex items-center gap-3 rounded-md px-3 py-3 text-base transition #{request.path == '/admin' ? 'bg-white/15 font-semibold text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'}" do %>
+      <span>▦</span>
+      Tổng quan
+    <% end %>
+
+    <p class="mb-3 mt-8 px-3 text-xs font-bold tracking-[0.16em] text-[#D6CBAA]/80">
+      QUẢN LÝ CỬA HÀNG
+    </p>
+
+    <%= link_to admin_products_path,
+          class: "flex items-center gap-3 rounded-md px-3 py-3 text-base transition #{request.path.start_with?('/admin/products') ? 'bg-white/15 font-semibold text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'}" do %>
+      <span>▣</span>
+      Sản phẩm
+    <% end %>
+
+    <%= link_to admin_orders_path,
+          class: "flex items-center gap-3 rounded-md px-3 py-3 text-base transition #{request.path.start_with?('/admin/orders') ? 'bg-white/15 font-semibold text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'}" do %>
+      <span>▤</span>
+      Đơn hàng
+    <% end %>
+
+    <%= link_to admin_customers_path,
+          class: "flex items-center gap-3 rounded-md px-3 py-3 text-base transition #{request.path.start_with?('/admin/customers') ? 'bg-white/15 font-semibold text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'}" do %>
+      <span>♙</span>
+      Khách hàng
+    <% end %>
+
+    <%= link_to admin_reviews_path,
+          class: "flex items-center gap-3 rounded-md px-3 py-3 text-base transition #{request.path.start_with?('/admin/reviews') ? 'bg-white/15 font-semibold text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'}" do %>
+      <span>☆</span>
+      Đánh giá
+    <% end %>
+
+    <%= link_to admin_promotion_codes_path,
+          class: "flex items-center gap-3 rounded-md px-3 py-3 text-base transition #{request.path.start_with?('/admin/promotion_codes') ? 'bg-white/15 font-semibold text-white' : 'text-white/90 hover:bg-white/10 hover:text-white'}" do %>
+      <span>◇</span>
+      Mã khuyến mãi
+    <% end %>
+
+  </nav>
+
+  <!-- KHU VỰC VỀ CỬA HÀNG -->
+  <div class="border-t border-white/10 p-4">
+
+    <%= link_to root_path,
+          class: "group flex items-center gap-3 rounded-lg border border-white/10 bg-white/5 px-3 py-3 transition hover:border-[#D6CBAA]/40 hover:bg-white/10" do %>
+
+      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#D6CBAA]/15 text-lg text-[#E9CF8A]">
+        ♧
+      </span>
+
+      <span class="min-w-0 flex-1 text-base font-semibold text-white">
+        Về cửa hàng
+      </span>
+
+      <span class="inline-flex shrink-0 items-center text-base leading-none text-white/70 transition group-hover:translate-x-1 group-hover:text-white">
+        ↗
+      </span>
+
+    <% end %>
+
+  </div>
+
+</div>
