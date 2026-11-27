@@ -1,4 +1,24 @@
 Rails.application.routes.draw do
+  # API V1
+  namespace :api do
+    namespace :v1 do
+      defaults format: :json do
+        # Đăng nhập và đăng xuất API
+        resource :session, only: %i[create destroy]
+
+        # Sản phẩm
+        resources :products, only: %i[index show]
+
+        # Đơn hàng của khách hàng
+        resources :orders, only: %i[index show] do
+          member do
+            get :payment_status
+          end
+        end
+      end
+    end
+  end
+
   # Tài khoản
   resource :registration, only: %i[new create]
   resource :session, only: %i[new create destroy]
@@ -10,8 +30,8 @@ Rails.application.routes.draw do
   # Đơn hàng của khách hàng
   resources :orders, only: %i[index show] do
     member do
-      get :payment
       get :payment_status
+      get :payment
       post :retry_payment
     end
   end
@@ -47,8 +67,10 @@ Rails.application.routes.draw do
   get "vnpay/ipn", to: "vnpay#ipn", as: :vnpay_ipn
   get "vnpay/return", to: "vnpay#payment_return", as: :vnpay_return
 
+  # Trang chủ
   root "home#index"
 
+  # Health check
   get "up" => "rails/health#show", as: :rails_health_check
 
   # Sản phẩm của khách hàng
