@@ -6,20 +6,7 @@ module Admin
       @orders = Order.includes(:user, :order_items)
                      .order(created_at: :desc)
 
-      if params[:status].present? && Order.statuses.key?(params[:status])
-        @orders = @orders.where(status: params[:status])
-      end
-
-      keyword = params[:q].to_s.strip
-
-      if keyword.present?
-        keyword = "%#{ActiveRecord::Base.sanitize_sql_like(keyword)}%"
-
-        @orders = @orders.where(
-          "order_number LIKE :q OR recipient_name LIKE :q OR phone LIKE :q",
-          q: keyword
-        )
-      end
+      filter_orders
     end
 
     def show
@@ -44,6 +31,30 @@ module Admin
     end
 
     private
+
+    def filter_orders
+      if Order.statuses.key?(params[:status])
+        @orders = @orders.where(status: params[:status])
+      end
+
+      if Order.payment_methods.key?(params[:payment_method])
+        @orders = @orders.where(payment_method: params[:payment_method])
+      end
+
+      if Order.payment_statuses.key?(params[:payment_status])
+        @orders = @orders.where(payment_status: params[:payment_status])
+      end
+
+      keyword = params[:q].to_s.strip
+      return if keyword.blank?
+
+      keyword = "%#{ActiveRecord::Base.sanitize_sql_like(keyword)}%"
+
+      @orders = @orders.where(
+        "order_number LIKE :q OR recipient_name LIKE :q OR phone LIKE :q",
+        q: keyword
+      )
+    end
 
     def set_order
       @order = Order.includes(:user, :order_items).find(params[:id])

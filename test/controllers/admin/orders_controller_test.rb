@@ -55,6 +55,31 @@ module Admin
       assert_not_includes response.body, pending_order.order_number
     end
 
+    test "admin có thể lọc đơn hàng theo phương thức thanh toán" do
+      cod_order = create_order(payment_method: :cod)
+      vnpay_order = create_order(payment_method: :vnpay)
+
+      get admin_orders_url, params: { payment_method: "vnpay" }
+
+      assert_response :success
+      assert_includes response.body, vnpay_order.order_number
+      assert_not_includes response.body, cod_order.order_number
+    end
+
+    test "admin có thể lọc đơn hàng theo trạng thái thanh toán" do
+      unpaid_order = create_order(payment_status: :unpaid)
+      paid_order = create_order(
+        payment_method: :vnpay,
+        payment_status: :paid
+      )
+
+      get admin_orders_url, params: { payment_status: "paid" }
+
+      assert_response :success
+      assert_includes response.body, paid_order.order_number
+      assert_not_includes response.body, unpaid_order.order_number
+    end
+
     test "admin có thể xem chi tiết đơn hàng" do
       order = create_order
       create_order_item(order)
@@ -68,6 +93,27 @@ module Admin
       assert_includes response.body, "SẢN PHẨM ĐÃ ĐẶT"
       assert_includes response.body, "TỔNG THANH TOÁN"
       assert_includes response.body, "Nhân sâm đen kiểm thử"
+      assert_includes response.body, "Thanh toán khi nhận hàng (COD)"
+      assert_includes response.body, "Chưa thanh toán"
+    end
+
+    test "admin có thể xem thông tin giao dịch VNPAY" do
+      paid_at = Time.zone.parse("2026-11-26 16:09:00")
+
+      order = create_order(
+        payment_method: :vnpay,
+        payment_status: :paid,
+        vnpay_transaction_no: "15750168",
+        paid_at: paid_at
+      )
+
+      get admin_order_url(order)
+
+      assert_response :success
+      assert_includes response.body, "Thanh toán trực tuyến qua VNPAY"
+      assert_includes response.body, "Đã thanh toán"
+      assert_includes response.body, "15750168"
+      assert_includes response.body, "16:09 26/11/2026"
     end
 
     test "admin có thể cập nhật trạng thái đơn hàng" do
@@ -80,6 +126,27 @@ module Admin
       assert_redirected_to admin_order_url(order)
       assert_equal "confirmed", order.reload.status
       assert_equal "Đã cập nhật trạng thái đơn hàng.", flash[:notice]
+    end
+
+    test "cập nhật trạng thái đơn hàng không làm thay đổi thông tin thanh toán VNPAY" do
+      order = create_order(
+        payment_method: :vnpay,
+        payment_status: :paid,
+        vnpay_transaction_no: "15750168",
+        paid_at: Time.zone.parse("2026-11-26 16:09:00")
+      )
+
+      patch admin_order_url(order), params: {
+        order: { status: "confirmed" }
+      }
+
+      order.reload
+
+      assert_redirected_to admin_order_url(order)
+      assert_equal "confirmed", order.status
+      assert_equal "paid", order.payment_status
+      assert_equal "15750168", order.vnpay_transaction_no
+      assert_equal Time.zone.parse("2026-11-26 16:09:00"), order.paid_at
     end
 
     test "admin không thể cập nhật trạng thái đơn hàng không hợp lệ" do

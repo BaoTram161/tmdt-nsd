@@ -47,13 +47,35 @@
 
         <div>
           <p class="text-xs text-gray-500">PHƯƠNG THỨC THANH TOÁN</p>
-          <p class="mt-1 text-gray-800">
-            Thanh toán khi nhận hàng (COD)
+          <p class="mt-1 font-medium text-gray-800">
+            <%= @order.vnpay? ? "Thanh toán trực tuyến qua VNPAY" : "Thanh toán khi nhận hàng (COD)" %>
           </p>
-          <p class="mt-1 text-xs text-[#8B6D2F]">
-            <%= @order.unpaid? ? "Chưa thanh toán" : (@order.paid? ? "Đã thanh toán" : "Đã hoàn tiền") %>
+
+          <p class="mt-1 text-xs font-medium <%= @order.paid? ? 'text-[#1B5B3A]' : 'text-[#8B6D2F]' %>">
+            <%= case @order.payment_status
+                when "paid" then "Đã thanh toán"
+                when "failed" then "Thanh toán thất bại"
+                when "refunded" then "Đã hoàn tiền"
+                else "Chưa thanh toán"
+                end %>
           </p>
         </div>
+
+        <% if @order.vnpay? %>
+          <div>
+            <p class="text-xs text-gray-500">MÃ GIAO DỊCH VNPAY</p>
+            <p class="mt-1 text-gray-800">
+              <%= @order.vnpay_transaction_no.presence || "Chưa có giao dịch" %>
+            </p>
+          </div>
+
+          <div>
+            <p class="text-xs text-gray-500">THỜI GIAN THANH TOÁN</p>
+            <p class="mt-1 text-gray-800">
+              <%= @order.paid_at&.in_time_zone("Asia/Ho_Chi_Minh")&.strftime("%H:%M %d/%m/%Y") || "Chưa thanh toán" %>
+            </p>
+          </div>
+        <% end %>
       </div>
     </div>
 
@@ -117,9 +139,11 @@
               <p class="font-medium text-[#123D2B]">
                 <%= item.product_name %>
               </p>
+
               <p class="mt-1 text-sm text-gray-500">
                 Đơn giá: <%= format_vnd(item.unit_price) %>
               </p>
+
               <p class="mt-1 text-sm text-gray-500">
                 Số lượng: <%= item.quantity %>
               </p>
@@ -194,7 +218,7 @@
       <% end %>
     </div>
 
-    <%= link_to "← QUAY LẠI DANH SÁCH ĐƠN HÀNG",
+    <%= link_to "QUAY LẠI DANH SÁCH ĐƠN HÀNG",
           admin_orders_path,
           class: "text-xs font-semibold tracking-wide text-[#123D2B] hover:text-[#B99A55]" %>
 

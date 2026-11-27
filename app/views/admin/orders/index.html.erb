@@ -20,33 +20,61 @@
     <!-- Tìm kiếm và lọc -->
     <div class="mb-6 border border-[#D8D0B8] bg-white p-5">
       <%= form_with url: admin_orders_path, method: :get,
-            class: "flex flex-col gap-3 md:flex-row" do |form| %>
+            class: "flex flex-col gap-3" do |form| %>
 
-        <%= form.text_field :q,
-              value: params[:q],
-              placeholder: "Tìm mã đơn, tên người nhận hoặc số điện thoại...",
-              class: "min-w-0 flex-1 border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#123D2B]" %>
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <%= form.text_field :q,
+                value: params[:q],
+                placeholder: "Tìm mã đơn, tên người nhận hoặc số điện thoại...",
+                class: "min-w-0 border border-[#D8D0B8] px-4 py-3 text-sm outline-none focus:border-[#123D2B]" %>
 
-        <%= form.select :status,
-              options_for_select(
-                [
-                  ["Tất cả trạng thái", ""],
-                  ["Chờ xác nhận", "pending"],
-                  ["Đã xác nhận", "confirmed"],
-                  ["Đang giao", "shipping"],
-                  ["Đã giao", "delivered"],
-                  ["Đã hủy", "cancelled"]
-                ],
-                params[:status]
-              ),
-              {},
-              class: "border border-[#D8D0B8] bg-white px-4 py-3 text-sm text-gray-700" %>
+          <%= form.select :status,
+                options_for_select(
+                  [
+                    ["Tất cả trạng thái đơn hàng", ""],
+                    ["Chờ xác nhận", "pending"],
+                    ["Đã xác nhận", "confirmed"],
+                    ["Đang giao", "shipping"],
+                    ["Đã giao", "delivered"],
+                    ["Đã hủy", "cancelled"]
+                  ],
+                  params[:status]
+                ),
+                {},
+                class: "min-w-0 border border-[#D8D0B8] bg-white px-4 py-3 text-sm text-gray-700" %>
+
+          <%= form.select :payment_method,
+                options_for_select(
+                  [
+                    ["Tất cả phương thức thanh toán", ""],
+                    ["Thanh toán khi nhận hàng (COD)", "cod"],
+                    ["Thanh toán trực tuyến (VNPAY)", "vnpay"]
+                  ],
+                  params[:payment_method]
+                ),
+                {},
+                class: "min-w-0 border border-[#D8D0B8] bg-white px-4 py-3 text-sm text-gray-700" %>
+
+          <%= form.select :payment_status,
+                options_for_select(
+                  [
+                    ["Tất cả trạng thái thanh toán", ""],
+                    ["Chưa thanh toán", "unpaid"],
+                    ["Đã thanh toán", "paid"],
+                    ["Thanh toán thất bại", "failed"],
+                    ["Đã hoàn tiền", "refunded"]
+                  ],
+                  params[:payment_status]
+                ),
+                {},
+                class: "min-w-0 border border-[#D8D0B8] bg-white px-4 py-3 text-sm text-gray-700" %>
+        </div>
 
         <div class="flex flex-wrap gap-3">
           <%= form.submit "TÌM KIẾM",
                 class: "cursor-pointer bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wide text-white hover:bg-[#1B5B3A]" %>
 
-          <%= link_to "XÓA TÌM KIẾM",
+          <%= link_to "XÓA BỘ LỌC",
                 admin_orders_path,
                 class: "border border-[#D8D0B8] px-6 py-3 text-center text-xs font-semibold tracking-wide text-[#123D2B] hover:bg-[#F7F4EA]" %>
         </div>
@@ -68,13 +96,14 @@
 
       <% if @orders.any? %>
         <div class="overflow-x-auto">
-          <table class="w-full min-w-[850px] text-left text-sm">
+          <table class="w-full min-w-[1000px] text-left text-sm">
             <thead class="bg-[#F7F4EA] text-xs text-gray-600">
               <tr>
                 <th class="px-5 py-4">MÃ ĐƠN</th>
                 <th class="px-5 py-4">NGƯỜI NHẬN</th>
                 <th class="px-5 py-4">NGÀY ĐẶT</th>
                 <th class="px-5 py-4">TỔNG TIỀN</th>
+                <th class="px-5 py-4">THANH TOÁN</th>
                 <th class="px-5 py-4">TRẠNG THÁI</th>
                 <th class="px-5 py-4 text-center">CHI TIẾT</th>
               </tr>
@@ -107,6 +136,21 @@
                   </td>
 
                   <td class="px-5 py-4">
+                    <p class="font-medium text-gray-800">
+                      <%= order.vnpay? ? "VNPAY" : "COD" %>
+                    </p>
+
+                    <p class="mt-1 text-xs font-medium <%= order.paid? ? 'text-[#1B5B3A]' : 'text-[#8B6D2F]' %>">
+                      <%= case order.payment_status
+                          when "paid" then "Đã thanh toán"
+                          when "failed" then "Thất bại"
+                          when "refunded" then "Đã hoàn tiền"
+                          else "Chưa thanh toán"
+                          end %>
+                    </p>
+                  </td>
+
+                  <td class="px-5 py-4">
                     <span class="border border-[#D8D0B8] px-3 py-1.5 text-xs text-[#8B6D2F]">
                       <%= order_status_label(order.status) %>
                     </span>
@@ -131,12 +175,11 @@
           </p>
 
           <p class="mt-2 text-sm text-gray-500">
-            Chưa có đơn hàng phù hợp với nội dung tìm kiếm.
+            Chưa có đơn hàng phù hợp với nội dung tìm kiếm hoặc bộ lọc.
           </p>
         </div>
       <% end %>
     </div>
-
 
   </div>
 </div>
