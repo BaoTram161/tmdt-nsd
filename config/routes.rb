@@ -8,7 +8,13 @@ Rails.application.routes.draw do
   resources :addresses, only: %i[index new create edit update destroy]
 
   # Đơn hàng của khách hàng
-  resources :orders, only: %i[index show]
+  resources :orders, only: %i[index show] do
+    member do
+      get :payment
+      get :payment_status
+      post :retry_payment
+    end
+  end
 
   # Đánh giá của khách hàng
   resources :reviews, only: :index
@@ -36,6 +42,10 @@ Rails.application.routes.draw do
       patch :toggle_active, on: :member
     end
   end
+
+  # Thanh toán VNPAY
+  get "vnpay/ipn", to: "vnpay#ipn", as: :vnpay_ipn
+  get "vnpay/return", to: "vnpay#payment_return", as: :vnpay_return
 
   root "home#index"
 

@@ -42,12 +42,48 @@
 
         <div>
           <p class="text-xs text-gray-500">PHƯƠNG THỨC THANH TOÁN</p>
+
           <p class="mt-1 font-medium text-gray-800">
-            Thanh toán khi nhận hàng (COD)
+            <%= @order.vnpay? ? "Thanh toán trực tuyến qua VNPAY" : "Thanh toán khi nhận hàng (COD)" %>
           </p>
-          <p class="mt-1 text-xs text-[#8B6D2F]">
-            <%= @order.unpaid? ? "Chưa thanh toán" : "Đã thanh toán" %>
+
+          <p class="mt-1 text-xs font-semibold <%= @order.paid? ? 'text-[#1B5B3A]' : 'text-[#8B6D2F]' %>">
+            <%= case @order.payment_status
+                when "paid" then "Đã thanh toán"
+                when "failed" then "Thanh toán thất bại"
+                when "refunded" then "Đã hoàn tiền"
+                else "Chưa thanh toán"
+                end %>
           </p>
+
+          <% if @order.vnpay_transaction_no.present? %>
+            <p class="mt-2 text-xs text-gray-500">
+              Mã giao dịch VNPAY:
+              <span class="font-medium text-[#123D2B]">
+                <%= @order.vnpay_transaction_no %>
+              </span>
+            </p>
+          <% end %>
+
+          <% if @order.paid_at.present? %>
+            <p class="mt-1 text-xs text-gray-500">
+              Thanh toán lúc:
+              <%= @order.paid_at.in_time_zone("Asia/Ho_Chi_Minh").strftime("%H:%M %d/%m/%Y") %>
+            </p>
+          <% end %>
+
+          <% if @order.vnpay? && @order.unpaid? && @order.pending? %>
+            <% if @order.payment_expires_at.blank? || @order.payment_expires_at.past? %>
+              <%= button_to "TẠO PHIÊN THANH TOÁN MỚI",
+                  retry_payment_order_path(@order),
+                  method: :post,
+                  class: "mt-3 inline-flex cursor-pointer bg-[#123D2B] px-4 py-2 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+            <% else %>
+              <%= link_to "TIẾP TỤC THANH TOÁN",
+                  payment_order_path(@order),
+                  class: "mt-3 inline-flex bg-[#123D2B] px-4 py-2 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+            <% end %>
+          <% end %>
         </div>
       </div>
     </div>

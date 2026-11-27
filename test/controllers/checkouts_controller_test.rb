@@ -1,6 +1,9 @@
 require "test_helper"
 
 class CheckoutsControllerTest < ActionDispatch::IntegrationTest
+  SECRET = "test-vnpay-secret"
+  TMN_CODE = "TESTCODE"
+
   setup do
     @user = users(:one)
     sign_in_as(@user)
@@ -73,6 +76,78 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
 
     get checkout_url
     assert_redirected_to cart_path
+  end
+
+  test "đặt hàng VNPAY thành công và chuyển đến trang QR thanh toán" do
+    post add_cart_item_url(@product), params: { quantity: 2 }
+
+    with_vnpay_credentials do
+      post checkout_url, params: {
+        address_id: @address.id,
+        payment_method: "vnpay"
+      }
+
+      order = @user.orders.order(created_at: :desc).first
+
+      assert_not_nil order
+      assert_redirected_to payment_order_url(order)
+
+      assert_equal "vnpay", order.payment_method
+      assert_equal "unpaid", order.payment_status
+      assert_equal "pending", order.status
+      assert_equal 220_000, order.total
+      assert_not_nil order.payment_expires_at
+
+      payment_url = VnpayPaymentService.new(
+        order: order,
+        ip_address: "127.0.0.1",
+        return_url: "http://www.example.com/vnpay/return"
+      ).payment_url
+
+      payment_uri = URI.parse(payment_url)
+      payment_params = URI.decode_www_form(payment_uri.query).to_h
+
+      assert_equal URI.parse(VnpayPaymentService::PAYMENT_URL).host,
+                   payment_uri.host
+      assert_equal "TESTCODE", payment_params["vnp_TmnCode"]
+      assert_equal "pay", payment_params["vnp_Command"]
+      assert_equal "22000000", payment_params["vnp_Amount"]
+      assert_equal "VND", payment_params["vnp_CurrCode"]
+
+      refute payment_params.key?("vnp_BankCode")
+
+      assert VnpaySignatureService.valid?(
+        payment_params,
+        secret: SECRET
+      )
+
+      @product.reload
+      assert_equal 8, @product.stock
+      assert_equal 2, @product.sold_count
+
+      assert_nil session[:cart]
+    end
+  end
+
+  test "không tạo đơn hàng và không trừ kho khi thiếu cấu hình VNPAY" do
+    post add_cart_item_url(@product), params: { quantity: 2 }
+
+    with_vnpay_credentials({}) do
+      assert_no_difference -> { @user.orders.count } do
+        post checkout_url, params: {
+          address_id: @address.id,
+          payment_method: "vnpay"
+        }
+      end
+
+      assert_redirected_to checkout_path
+
+      @product.reload
+      assert_equal 10, @product.stock
+      assert_equal 0, @product.sold_count
+
+      assert_equal 2, session[:cart][@product.id.to_s]
+    end
   end
 
   test "đặt hàng thành công với mã khuyến mãi và cập nhật lượt sử dụng" do
@@ -173,8 +248,6 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, @product.sold_count
   end
 
-  # HIỂN THỊ THANH TOÁN
-
   test "hiển thị trang thanh toán khi giỏ hàng hợp lệ" do
     post add_cart_item_url(@product), params: { quantity: 2 }
 
@@ -210,6 +283,25 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
   end
 
   private
+
+  def with_vnpay_credentials(values = {
+    tmn_code: TMN_CODE,
+    hash_secret: SECRET
+  })
+    application = Rails.application
+    original_credentials = application.method(:credentials)
+
+    application.define_singleton_method(:credentials) do
+      { vnpay: values }
+    end
+
+    yield
+  ensure
+    application.define_singleton_method(
+      :credentials,
+      original_credentials
+    )
+  end
 
   def create_promotion_code(attributes = {})
     PromotionCode.create!(

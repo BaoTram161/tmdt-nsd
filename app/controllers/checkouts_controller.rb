@@ -1,5 +1,6 @@
 class CheckoutsController < ApplicationController
   SHIPPING_FEE = 20_000
+  PAYMENT_METHODS = %w[cod vnpay].freeze
 
   class CheckoutError < StandardError; end
 
@@ -40,9 +41,12 @@ class CheckoutsController < ApplicationController
       @addresses.find_by(is_default: true)&.id ||
       @addresses.first&.id
 
+    @selected_payment_method =
+      PAYMENT_METHODS.include?(params[:payment_method]) ?
+        params[:payment_method] : "cod"
+
     @subtotal = calculate_subtotal(@cart_items)
     @shipping_fee = SHIPPING_FEE
-
     @discount_amount = 0.to_d
     @promotion_code = nil
 
@@ -60,7 +64,6 @@ class CheckoutsController < ApplicationController
 
       if error.present?
         session.delete(:promotion_code)
-
         return redirect_to cart_path, alert: error
       end
 
@@ -79,6 +82,13 @@ class CheckoutsController < ApplicationController
     unless address
       return redirect_to checkout_path,
                          alert: "Vui lòng chọn địa chỉ giao hàng."
+    end
+
+    payment_method = params[:payment_method].presence || "cod"
+
+    unless PAYMENT_METHODS.include?(payment_method)
+      return redirect_to checkout_path,
+                         alert: "Phương thức thanh toán không hợp lệ."
     end
 
     quantities = normalized_cart
@@ -110,7 +120,6 @@ class CheckoutsController < ApplicationController
       end
 
       subtotal = calculate_subtotal(cart_items)
-
       promotion = nil
       discount_amount = 0.to_d
 
@@ -133,6 +142,10 @@ class CheckoutsController < ApplicationController
         discount_amount = promotion.calculate_discount(subtotal)
       end
 
+      payment_expires_at =
+        payment_method == "vnpay" ?
+          VnpayPaymentService::PAYMENT_DURATION.from_now : nil
+
       @order = Current.user.orders.create!(
         recipient_name: address.recipient_name,
         phone: address.phone,
@@ -144,8 +157,9 @@ class CheckoutsController < ApplicationController
         promotion_code: promotion&.code,
         discount_amount: discount_amount,
         total: subtotal - discount_amount + SHIPPING_FEE,
-        payment_method: :cod,
+        payment_method: payment_method,
         payment_status: :unpaid,
+        payment_expires_at: payment_expires_at,
         status: :pending,
         note: params[:note].to_s.strip.presence
       )
@@ -169,13 +183,30 @@ class CheckoutsController < ApplicationController
       end
 
       promotion.increment!(:used_count) if promotion
+
+      if payment_method == "vnpay"
+        VnpayPaymentService.new(
+          order: @order,
+          ip_address: request.remote_ip,
+          return_url: vnpay_return_url(
+            host: request.host,
+            protocol: request.scheme
+          )
+        ).payment_url
+      end
     end
 
     session.delete(:cart)
     session.delete(:promotion_code)
 
-    render :create, status: :created
+    if payment_method == "vnpay"
+      redirect_to payment_order_path(@order)
+    else
+      render :create, status: :created
+    end
   rescue CheckoutError => e
+    redirect_to checkout_path, alert: e.message
+  rescue VnpayPaymentService::ConfigurationError => e
     redirect_to checkout_path, alert: e.message
   rescue ActiveRecord::RecordInvalid => e
     redirect_to checkout_path,

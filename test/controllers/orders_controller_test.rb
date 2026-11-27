@@ -60,6 +60,65 @@ class OrdersControllerTest < ActionDispatch::IntegrationTest
                     response.body.index(older_order.order_number)
   end
 
+    test "API trả về trạng thái thanh toán của đơn VNPAY" do
+    order = create_order_for(@user)
+    order.update!(
+      payment_method: :vnpay,
+      payment_status: :unpaid,
+      payment_expires_at: 15.minutes.from_now
+    )
+
+    get payment_status_order_url(order)
+
+    assert_response :success
+
+    data = JSON.parse(response.body)
+
+    assert_equal "unpaid", data["payment_status"]
+    assert_equal false, data["paid"]
+    assert_equal false, data["expired"]
+  end
+
+  test "người dùng không thể kiểm tra thanh toán đơn của tài khoản khác" do
+    other_order = create_order_for(@other_user)
+
+    get payment_status_order_url(other_order)
+
+    assert_response :not_found
+  end
+
+  test "khách hàng có thể tạo phiên VNPAY mới khi phiên cũ hết hạn" do
+    order = create_order_for(@user)
+    order.update!(
+      payment_method: :vnpay,
+      payment_status: :unpaid,
+      status: :pending,
+      payment_expires_at: 1.minute.ago
+    )
+
+    post retry_payment_order_url(order)
+
+    assert_redirected_to payment_order_url(order)
+    assert_operator order.reload.payment_expires_at, :>, Time.current
+  end
+
+  test "không tạo phiên thanh toán mới khi phiên hiện tại còn hạn" do
+    order = create_order_for(@user)
+    original_expiry = 10.minutes.from_now
+
+    order.update!(
+      payment_method: :vnpay,
+      payment_status: :unpaid,
+      status: :pending,
+      payment_expires_at: original_expiry
+    )
+
+    post retry_payment_order_url(order)
+
+    assert_redirected_to payment_order_url(order)
+    assert_equal original_expiry.to_i, order.reload.payment_expires_at.to_i
+  end
+
   private
 
   def create_order_for(user)

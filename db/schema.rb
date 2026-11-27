@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_20_110959) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_25_162436) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -83,9 +83,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_20_110959) do
     t.string "payment_status", default: "unpaid", null: false
     t.string "promotion_code"
     t.decimal "discount_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.string "vnpay_transaction_no"
+    t.datetime "paid_at"
+    t.datetime "payment_expires_at"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["payment_status"], name: "index_orders_on_payment_status"
     t.index ["user_id"], name: "index_orders_on_user_id"
+    t.index ["vnpay_transaction_no"], name: "index_orders_on_vnpay_transaction_no", unique: true
   end
 
   create_table "products", force: :cascade do |t|

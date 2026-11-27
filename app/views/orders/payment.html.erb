@@ -1,0 +1,247 @@
+<% content_for :title, "Thanh toán đơn hàng | BLACK GINSENG" %>
+
+<section
+  class="min-h-screen bg-[#F7F4EA] px-4 py-10 md:py-14"
+  data-controller="payment-status"
+  data-payment-status-url-value="<%= payment_status_order_path(@order) %>"
+  data-payment-status-expires-at-value="<%= @order.payment_expires_at&.iso8601 %>"
+>
+  <div class="mx-auto max-w-5xl">
+    <div class="mb-8 text-center">
+      <p class="text-xs font-semibold tracking-[0.25em] text-[#B99A55]">
+        BLACK GINSENG
+      </p>
+
+      <h1 class="mt-3 font-sans text-2xl font-bold tracking-tight text-[#123D2B] md:text-3xl">
+        THANH TOÁN TRỰC TUYẾN
+      </h1>
+
+      <p class="mt-2 text-sm text-gray-500">
+        Hoàn tất thanh toán đơn hàng của bạn qua VNPAY
+      </p>
+    </div>
+
+    <div class="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
+      <div class="border border-[#D8D0B8] bg-white p-5 md:p-8">
+        <div class="border-b border-[#E8E2D4] pb-5 text-center">
+          <span
+            data-payment-status-target="status"
+            class="inline-flex items-center gap-2 border border-[#E9CF8A] bg-[#FFF9E9] px-4 py-2 text-xs font-semibold text-[#8B6D2F]"
+          >
+            <span class="h-2 w-2 rounded-full bg-[#B99A55]"></span>
+            <%= @payment_expired ? "PHIÊN THANH TOÁN ĐÃ HẾT HẠN" : "ĐANG CHỜ THANH TOÁN" %>
+          </span>
+
+          <p class="mt-5 text-xs tracking-wide text-gray-500">
+            TỔNG SỐ TIỀN CẦN THANH TOÁN
+          </p>
+
+          <p class="mt-2 text-3xl font-bold text-[#A83232] md:text-4xl">
+            <%= format_vnd(@order.total) %>
+          </p>
+
+          <p class="mt-3 text-sm text-gray-500">
+            Mã đơn hàng:
+            <span class="font-semibold text-[#123D2B]">
+              <%= @order.order_number %>
+            </span>
+          </p>
+        </div>
+
+        <div
+          data-payment-status-target="paidPanel"
+          hidden
+          class="py-12 text-center"
+        >
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#EAF2EC] text-3xl text-[#123D2B]">
+            ✓
+          </div>
+
+          <h2 class="mt-5 text-lg font-bold text-[#123D2B]">
+            THANH TOÁN THÀNH CÔNG
+          </h2>
+
+          <p class="mt-2 text-sm leading-6 text-gray-500">
+            Hệ thống đã nhận được xác nhận thanh toán từ VNPAY.
+          </p>
+
+          <%= link_to "XEM CHI TIẾT ĐƠN HÀNG",
+              order_path(@order),
+              class: "mt-6 inline-flex bg-[#123D2B] px-7 py-3 text-xs font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+        </div>
+
+        <div
+          data-payment-status-target="expiredPanel"
+          <%= "hidden" unless @payment_expired %>
+          class="py-12 text-center"
+        >
+          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#FFF9E9] text-3xl text-[#8B6D2F]">
+            !
+          </div>
+
+          <h2 class="mt-5 text-lg font-bold text-[#123D2B]">
+            PHIÊN THANH TOÁN ĐÃ HẾT HẠN
+          </h2>
+
+          <p class="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+            Phiên thanh toán trước đã hết hiệu lực. Bạn có thể tạo phiên mới để tiếp tục thanh toán đơn hàng.
+          </p>
+
+          <%= button_to "TẠO PHIÊN THANH TOÁN MỚI",
+              retry_payment_order_path(@order),
+              method: :post,
+              class: "mt-6 w-full cursor-pointer bg-[#123D2B] px-5 py-4 text-sm font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" %>
+        </div>
+
+        <div
+          data-payment-status-target="paymentContent"
+          <%= "hidden" if @payment_expired %>
+        >
+          <div class="py-7 text-center">
+            <h2 class="text-base font-semibold text-[#123D2B]">
+              QUÉT MÃ ĐỂ MỞ CỔNG THANH TOÁN
+            </h2>
+
+            <p class="mt-2 text-sm leading-6 text-gray-500">
+              Dùng camera điện thoại hoặc ứng dụng quét QR để mở trang thanh toán VNPAY.
+            </p>
+
+            <div class="mx-auto mt-6 flex max-w-[320px] items-center justify-center border border-[#D8D0B8] bg-white p-4">
+              <div class="w-full [&_svg]:h-auto [&_svg]:w-full">
+                <%= raw @qr_svg if @qr_svg.present? %>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-[#E8E2D4] pt-6">
+            <% if @payment_url.present? %>
+              <%= link_to @payment_url,
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  class: "flex w-full items-center justify-center bg-[#123D2B] px-5 py-4 text-center text-sm font-semibold tracking-wide text-white transition hover:bg-[#1B5B3A]" do %>
+                MỞ CỔNG THANH TOÁN VNPAY
+              <% end %>
+            <% end %>
+
+            <p class="mt-3 text-center text-xs leading-5 text-gray-400">
+              Hoặc quét mã QR bằng điện thoại để tiếp tục thanh toán.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="space-y-5">
+        <div class="border border-[#D8D0B8] bg-white p-5">
+          <h2 class="border-b border-[#E8E2D4] pb-4 text-sm font-semibold tracking-wide text-[#123D2B]">
+            THÔNG TIN THANH TOÁN
+          </h2>
+
+          <div class="mt-4 space-y-4 text-sm">
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">Mã đơn hàng</span>
+              <span class="text-right font-medium text-[#123D2B]">
+                <%= @order.order_number %>
+              </span>
+            </div>
+
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">Phương thức</span>
+              <span class="font-medium text-[#123D2B]">
+                VNPAY Sandbox
+              </span>
+            </div>
+
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">Trạng thái</span>
+              <span class="text-right font-semibold <%= @order.paid? ? 'text-[#1B5B3A]' : 'text-[#8B6D2F]' %>">
+                <%= @order.paid? ? "Đã thanh toán" : "Chưa thanh toán" %>
+              </span>
+            </div>
+
+            <div class="border-t border-[#E8E2D4] pt-4">
+              <div class="flex justify-between gap-3">
+                <span class="font-semibold text-[#123D2B]">
+                  Tổng thanh toán
+                </span>
+                <span class="font-bold text-[#A83232]">
+                  <%= format_vnd(@order.total) %>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% unless @payment_expired %>
+          <div class="border border-[#D8D0B8] bg-white p-5">
+            <h2 class="border-b border-[#E8E2D4] pb-4 text-sm font-semibold tracking-wide text-[#123D2B]">
+              LƯU Ý KHI THANH TOÁN
+            </h2>
+
+            <ol class="mt-4 space-y-3 text-sm leading-6 text-gray-600">
+              <li class="grid grid-cols-[20px_1fr] gap-2">
+                <span class="font-semibold text-[#B99A55]">1.</span>
+                <span class="text-justify">
+                  Quét mã QR bằng camera điện thoại hoặc nhấn nút mở cổng thanh toán VNPAY.
+                </span>
+              </li>
+
+              <li class="grid grid-cols-[20px_1fr] gap-2">
+                <span class="font-semibold text-[#B99A55]">2.</span>
+                <span class="text-justify">
+                  Thực hiện thanh toán theo hướng dẫn trên cổng VNPAY.
+                </span>
+              </li>
+
+              <li class="grid grid-cols-[20px_1fr] gap-2">
+                <span class="font-semibold text-[#B99A55]">3.</span>
+                <span class="text-justify">
+                  Sau khi hoàn tất, vui lòng chờ hệ thống cập nhật trạng thái đơn hàng.
+                </span>
+              </li>
+
+              <li class="grid grid-cols-[20px_1fr] gap-2">
+                <span class="font-semibold text-[#B99A55]">4.</span>
+                <span class="text-justify">
+                  Không đóng trang thanh toán trước khi hoàn tất giao dịch.
+                </span>
+              </li>
+            </ol>
+          </div>
+        <% end %>
+
+        <div class="border border-[#D8D0B8] bg-white p-5">
+          <h2 class="border-b border-[#E8E2D4] pb-4 text-sm font-semibold tracking-wide text-[#123D2B]">
+            THỜI HẠN THANH TOÁN
+          </h2>
+
+          <p class="mt-4 text-sm font-semibold text-[#123D2B]">
+            <%= @order.payment_expires_at&.in_time_zone("Asia/Ho_Chi_Minh")&.strftime("%H:%M - %d/%m/%Y") %>
+          </p>
+
+          <% unless @payment_expired %>
+            <p class="mt-3 text-xs text-gray-500">
+              Thời gian còn lại
+            </p>
+
+            <p
+              data-payment-status-target="countdown"
+              class="mt-1 text-2xl font-bold tabular-nums text-[#A83232]"
+            >
+              --:--
+            </p>
+          <% end %>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mx-auto mt-7 grid max-w-xl grid-cols-1 gap-3 sm:grid-cols-2">
+      <%= link_to "XEM CHI TIẾT ĐƠN HÀNG",
+          order_path(@order),
+          class: "flex min-h-12 items-center justify-center border border-[#D8D0B8] bg-white px-5 py-3 text-center text-xs font-semibold tracking-wide text-gray-600 transition hover:border-[#123D2B] hover:text-[#123D2B]" %>
+
+      <%= link_to "DANH SÁCH ĐƠN HÀNG",
+          orders_path,
+          class: "flex min-h-12 items-center justify-center border border-[#D8D0B8] bg-white px-5 py-3 text-center text-xs font-semibold tracking-wide text-gray-600 transition hover:border-[#123D2B] hover:text-[#123D2B]" %>
+    </div>
+  </div>
+</section>

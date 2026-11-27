@@ -13,13 +13,15 @@ class Order < ApplicationRecord
 
   # Phương thức thanh toán
   enum :payment_method, {
-    cod: "cod"
+    cod: "cod",
+    vnpay: "vnpay"
   }, default: :cod
 
   # Trạng thái thanh toán độc lập với trạng thái đơn hàng
   enum :payment_status, {
     unpaid: "unpaid",
     paid: "paid",
+    failed: "failed",
     refunded: "refunded"
   }, default: :unpaid
 

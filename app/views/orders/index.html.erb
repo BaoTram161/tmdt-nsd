@@ -62,6 +62,7 @@
                         <p class="text-sm font-medium text-[#123D2B]">
                           <%= item.product_name %>
                         </p>
+
                         <p class="mt-1 text-xs text-gray-500">
                           Số lượng: <%= item.quantity %>
                         </p>
@@ -77,12 +78,39 @@
                 <div class="flex flex-col gap-4 border-t border-[#D8D0B8] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p class="text-xs text-gray-500">TỔNG THANH TOÁN</p>
+
                     <p class="mt-1 text-lg font-semibold text-[#A83232]">
                       <%= format_vnd(order.total) %>
+                    </p>
+
+                    <p class="mt-1 text-xs text-gray-500">
+                      <%= order.vnpay? ? "VNPAY" : "Thanh toán khi nhận hàng (COD)" %>
+                      <span class="mx-1">·</span>
+                      <span class="<%= order.paid? ? 'font-semibold text-[#1B5B3A]' : 'text-[#8B6D2F]' %>">
+                        <%= case order.payment_status
+                            when "paid" then "Đã thanh toán"
+                            when "failed" then "Thanh toán thất bại"
+                            when "refunded" then "Đã hoàn tiền"
+                            else "Chưa thanh toán"
+                            end %>
+                      </span>
                     </p>
                   </div>
 
                   <div class="flex flex-wrap items-center gap-3">
+                    <% if order.vnpay? && order.unpaid? && order.pending? %>
+                      <% if order.payment_expires_at.blank? || order.payment_expires_at.past? %>
+                        <%= button_to "THANH TOÁN LẠI",
+                            retry_payment_order_path(order),
+                            method: :post,
+                            class: "inline-flex cursor-pointer items-center justify-center bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wider text-white transition hover:bg-[#1B5B3A]" %>
+                      <% else %>
+                        <%= link_to "THANH TOÁN",
+                            payment_order_path(order),
+                            class: "inline-flex items-center justify-center bg-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wider text-white transition hover:bg-[#1B5B3A]" %>
+                      <% end %>
+                    <% end %>
+
                     <%= link_to "XEM CHI TIẾT",
                         order_path(order),
                         class: "inline-flex items-center justify-center border border-[#123D2B] px-6 py-3 text-xs font-semibold tracking-wider text-[#123D2B] transition hover:bg-[#123D2B] hover:text-white" %>

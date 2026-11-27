@@ -1,0 +1,2 @@
+module VnpayHelper
+end
