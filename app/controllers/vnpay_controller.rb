@@ -92,7 +92,22 @@ class VnpayController < ApplicationController
                          alert: "Không tìm thấy đơn hàng."
     end
 
-    if order.payment_status == "paid"
+    if successful_transaction?(params) &&
+       valid_amount?(order, params["vnp_Amount"]) &&
+       params["vnp_TransactionNo"].present?
+
+      order.with_lock do
+        if order.payment_status == "unpaid" && !order.cancelled?
+          order.update!(
+            payment_status: :paid,
+            vnpay_transaction_no: params["vnp_TransactionNo"],
+            paid_at: Time.current
+          )
+        end
+      end
+    end
+
+    if order.reload.payment_status == "paid"
       redirect_to order_path(order),
                   notice: "Thanh toán đơn hàng thành công."
     else

@@ -152,6 +152,51 @@ class VnpayControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "Return hợp lệ cập nhật đơn hàng thành đã thanh toán" do
+    sign_in_as(@user)
+
+    with_vnpay_credentials do
+      get vnpay_return_path, params: signed_params
+
+      assert_redirected_to order_path(@order)
+
+      @order.reload
+
+      assert_equal "paid", @order.payment_status
+      assert_equal "20123456", @order.vnpay_transaction_no
+      assert_not_nil @order.paid_at
+    end
+  end
+
+  test "Return sai số tiền không cập nhật đơn hàng" do
+    sign_in_as(@user)
+
+    with_vnpay_credentials do
+      get vnpay_return_path,
+          params: signed_params("vnp_Amount" => "100")
+
+      assert_redirected_to order_path(@order)
+      assert_equal "unpaid", @order.reload.payment_status
+    end
+  end
+
+  test "Return gửi lại không ghi nhận thanh toán lần thứ hai" do
+    sign_in_as(@user)
+
+    with_vnpay_credentials do
+      get vnpay_return_path, params: signed_params
+
+      assert_equal "paid", @order.reload.payment_status
+      paid_at = @order.paid_at
+
+      get vnpay_return_path, params: signed_params
+
+      assert_redirected_to order_path(@order)
+      assert_equal "paid", @order.reload.payment_status
+      assert_equal paid_at, @order.paid_at
+    end
+  end
+
   private
 
   def with_vnpay_credentials
