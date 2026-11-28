@@ -61,6 +61,20 @@ class PromotionCode < ApplicationRecord
       return "Đơn hàng chưa đạt giá trị tối thiểu để sử dụng mã này."
     end
 
+    if code == "WELCOME10" || code == "SALE5"
+      return "Vui lòng đăng nhập để sử dụng mã khuyến mãi." unless user
+
+      order_count = user.orders.where.not(status: :cancelled).count
+
+      if code == "WELCOME10" && order_count.positive?
+        return "Mã WELCOME10 chỉ dành cho khách hàng chưa từng đặt đơn hàng."
+      end
+
+      if code == "SALE5" && order_count != 1
+        return "Mã SALE5 chỉ áp dụng cho đơn hàng thứ hai của bạn."
+      end
+    end
+
     if per_user_limit.present?
       return "Vui lòng đăng nhập để sử dụng mã khuyến mãi." unless user
 

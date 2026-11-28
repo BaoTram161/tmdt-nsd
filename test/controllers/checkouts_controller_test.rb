@@ -162,6 +162,7 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
     post apply_cart_promotion_url, params: { code: "SAVE10" }
 
     assert_redirected_to cart_path
+    assert_equal "SAVE10", session[:promotion_code]
 
     post checkout_url, params: {
       address_id: @address.id
@@ -282,6 +283,80 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to cart_path
   end
 
+  test "không áp dụng WELCOME10 khi khách đã có đơn hàng" do
+    create_previous_order
+
+    assert_checkout_rejects_promotion(
+      code: "WELCOME10",
+      message: "Mã WELCOME10 chỉ dành cho khách hàng chưa từng đặt đơn hàng."
+    )
+  end
+
+  test "không áp dụng SALE5 khi khách chưa có đơn hàng" do
+    assert_checkout_rejects_promotion(
+      code: "SALE5",
+      message: "Mã SALE5 chỉ áp dụng cho đơn hàng thứ hai của bạn."
+    )
+  end
+
+  test "áp dụng SALE5 khi khách có đúng một đơn hàng trước đó" do
+    create_previous_order
+
+    post add_cart_item_url(@product), params: { quantity: 2 }
+
+    promotion = create_promotion_code(
+      code: "SALE5",
+      discount_type: "percentage",
+      discount_value: 5,
+      per_user_limit: 1
+    )
+
+    post apply_cart_promotion_url, params: { code: "SALE5" }
+
+    assert_redirected_to cart_path
+    assert_equal "SALE5", session[:promotion_code]
+
+    post checkout_url, params: { address_id: @address.id }
+
+    assert_response :created
+
+    order = @user.orders.order(created_at: :desc).first
+
+    assert_equal "SALE5", order.promotion_code
+    assert_equal 200_000, order.subtotal
+    assert_equal 10_000, order.discount_amount
+    assert_equal 20_000, order.shipping_fee
+    assert_equal 210_000, order.total
+    assert_equal 1, promotion.reload.used_count
+
+    @product.reload
+    assert_equal 8, @product.stock
+    assert_equal 2, @product.sold_count
+  end
+
+  test "không áp dụng voucher đã hết lượt sử dụng" do
+    post add_cart_item_url(@product), params: { quantity: 2 }
+
+    promotion = create_promotion_code(
+      usage_limit: 1,
+      used_count: 1
+    )
+
+    assert_no_difference -> { @user.orders.count } do
+      post apply_cart_promotion_url, params: { code: promotion.code }
+    end
+
+    assert_redirected_to cart_path
+    assert_predicate flash[:alert], :present?
+    assert_nil session[:promotion_code]
+
+    assert_equal 1, promotion.reload.used_count
+
+    @product.reload
+    assert_equal 10, @product.stock
+    assert_equal 0, @product.sold_count
+  end
+
   private
 
   def with_vnpay_credentials(values = {
@@ -314,5 +389,42 @@ class CheckoutsControllerTest < ActionDispatch::IntegrationTest
         used_count: 0
       }.merge(attributes)
     )
+  end
+
+  def create_previous_order
+    Order.create!(
+      user: @user,
+      recipient_name: "Test Customer",
+      phone: "0900000000",
+      province: "TP. Hồ Chí Minh",
+      ward: "Phường Bến Nghé",
+      street_address: "123 Đường Test"
+    )
+  end
+
+  def assert_checkout_rejects_promotion(code:, message:)
+    post add_cart_item_url(@product), params: { quantity: 2 }
+
+    promotion = create_promotion_code(
+      code: code,
+      discount_type: "percentage",
+      discount_value: code == "SALE5" ? 5 : 10,
+      minimum_order_value: 0,
+      per_user_limit: 1
+    )
+
+    assert_no_difference -> { @user.orders.count } do
+      post apply_cart_promotion_url, params: { code: code }
+    end
+
+    assert_redirected_to cart_path
+    assert_equal message, flash[:alert]
+
+    assert_nil session[:promotion_code]
+    assert_equal 0, promotion.reload.used_count
+
+    @product.reload
+    assert_equal 10, @product.stock
+    assert_equal 0, @product.sold_count
   end
 end

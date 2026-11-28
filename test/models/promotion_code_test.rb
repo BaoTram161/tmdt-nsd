@@ -10,6 +10,8 @@ class PromotionCodeTest < ActiveSupport::TestCase
       used_count: 0,
       active: true
     )
+
+    @user = users(:one)
   end
 
   test "valid promotion code" do
@@ -124,5 +126,81 @@ class PromotionCodeTest < ActiveSupport::TestCase
     @promotion_code.used_count = 5
 
     assert_equal 0.to_d, @promotion_code.calculate_discount(1_000)
+  end
+
+  test "allows WELCOME10 when user has no orders" do
+    promotion = build_promotion_code("WELCOME10")
+
+    assert_nil promotion.eligibility_error(user: @user, subtotal: 1_000_000)
+  end
+
+  test "rejects WELCOME10 when user already has an order" do
+    create_order(@user)
+
+    promotion = build_promotion_code("WELCOME10")
+
+    assert_match "chưa từng đặt đơn hàng",
+                 promotion.eligibility_error(user: @user, subtotal: 1_000_000)
+  end
+
+  test "allows SALE5 when user has exactly one order" do
+    create_order(@user)
+
+    promotion = build_promotion_code("SALE5")
+
+    assert_nil promotion.eligibility_error(user: @user, subtotal: 1_000_000)
+  end
+
+  test "rejects SALE5 when user has no orders" do
+    promotion = build_promotion_code("SALE5")
+
+    assert_match "đơn hàng thứ hai",
+                 promotion.eligibility_error(user: @user, subtotal: 1_000_000)
+  end
+
+  test "rejects SALE5 when user has more than one order" do
+    create_order(@user)
+    create_order(@user)
+
+    promotion = build_promotion_code("SALE5")
+
+    assert_match "đơn hàng thứ hai",
+                 promotion.eligibility_error(user: @user, subtotal: 1_000_000)
+  end
+
+  test "does not count cancelled orders for promotion eligibility" do
+    create_order(@user, status: :cancelled)
+
+    welcome = build_promotion_code("WELCOME10")
+    sale = build_promotion_code("SALE5")
+
+    assert_nil welcome.eligibility_error(user: @user, subtotal: 1_000_000)
+    assert_match "đơn hàng thứ hai",
+                 sale.eligibility_error(user: @user, subtotal: 1_000_000)
+  end
+
+  private
+
+  def build_promotion_code(code)
+    PromotionCode.new(
+      code: code,
+      discount_type: :percentage,
+      discount_value: 10,
+      minimum_order_value: 0,
+      used_count: 0,
+      active: true
+    )
+  end
+
+  def create_order(user, status: :pending)
+    Order.create!(
+      user: user,
+      recipient_name: "Test Customer",
+      phone: "0900000000",
+      province: "TP. Hồ Chí Minh",
+      ward: "Phường Bến Nghé",
+      street_address: "123 Đường Test",
+      status: status
+    )
   end
 end
